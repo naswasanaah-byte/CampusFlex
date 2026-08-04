@@ -16,9 +16,9 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  currentUser: MOCK_USERS[0], // Default student Alex Rivera
+  currentUser: null,
   usersList: MOCK_USERS,
-  isAuthenticated: true,
+  isAuthenticated: false,
 
   switchRole: (role: UserRole) => {
     const found = get().usersList.find((u) => u.role === role);
