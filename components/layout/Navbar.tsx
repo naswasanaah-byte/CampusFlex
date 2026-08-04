@@ -63,7 +63,6 @@ export const Navbar: React.FC = () => {
 
           {/* Right Action Items */}
           <div className="hidden lg:flex items-center gap-4">
-            <RoleSwitcher />
 
             {/* Dark Mode Toggle */}
             <button
@@ -145,9 +144,6 @@ export const Navbar: React.FC = () => {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 pt-2 pb-6 space-y-4">
-          <div className="pt-2">
-            <RoleSwitcher />
-          </div>
           <nav className="flex flex-col gap-3 font-medium text-slate-700 dark:text-slate-200">
             <Link
               href="/jobs"

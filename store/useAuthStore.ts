@@ -28,18 +28,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   login: (email: string, role?: UserRole) => {
+    const cleanEmail = email.trim().toLowerCase();
     const matched = get().usersList.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase() || (role && u.role === role)
+      (u) => u.email.toLowerCase() === cleanEmail
     );
     if (matched) {
       set({ currentUser: matched, isAuthenticated: true });
       return true;
     }
-    // Create quick fallback user
+    // Create new account dynamically for the user
     const newUser: User = {
       id: `user-${Date.now()}`,
-      name: email.split('@')[0],
-      email: email,
+      name: cleanEmail.split('@')[0],
+      email: cleanEmail,
       role: role || 'student',
       verified: role === 'student',
       status: 'active',

@@ -12,8 +12,8 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuthStore();
 
-  const [email, setEmail] = useState('alex.rivera@university.edu');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState<UserRole>('student');
   const [error, setError] = useState('');
   const [forgotModalOpen, setForgotModalOpen] = useState(false);
@@ -32,16 +32,6 @@ export default function LoginPage() {
     } else {
       setError('Invalid email credentials. Please check your details.');
     }
-  };
-
-  const handleQuickDemo = (role: UserRole, demoEmail: string) => {
-    setSelectedRole(role);
-    setEmail(demoEmail);
-    login(demoEmail, role);
-
-    if (role === 'employer') router.push('/employer/dashboard');
-    else if (role === 'admin') router.push('/admin/dashboard');
-    else router.push('/student/dashboard');
   };
 
   const handleForgotSubmit = (e: React.FormEvent) => {
@@ -68,33 +58,6 @@ export default function LoginPage() {
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Sign in to access student jobs, hiring dashboards, and work IDs.
           </p>
-        </div>
-
-        {/* Quick Demo Credentials Box */}
-        <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
-          <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 block">
-            ⚡ One-Click Demo Sign In:
-          </span>
-          <div className="grid grid-cols-3 gap-1.5">
-            <button
-              onClick={() => handleQuickDemo('student', 'alex.rivera@university.edu')}
-              className="px-2 py-1.5 rounded-xl bg-primary-600 text-white text-[11px] font-bold shadow-sm hover:opacity-90 transition-opacity"
-            >
-              Student
-            </button>
-            <button
-              onClick={() => handleQuickDemo('employer', 'hiring@techcorp.com')}
-              className="px-2 py-1.5 rounded-xl bg-indigo-600 text-white text-[11px] font-bold shadow-sm hover:opacity-90 transition-opacity"
-            >
-              Employer
-            </button>
-            <button
-              onClick={() => handleQuickDemo('admin', 'admin@campusflex.com')}
-              className="px-2 py-1.5 rounded-xl bg-rose-600 text-white text-[11px] font-bold shadow-sm hover:opacity-90 transition-opacity"
-            >
-              Admin
-            </button>
-          </div>
         </div>
 
         {error && (
