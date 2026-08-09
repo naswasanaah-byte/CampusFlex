@@ -75,7 +75,7 @@ export default function StudentDashboard() {
           />
           <StatCard
             title="Total Earned"
-            value="$1,282.50"
+            value={currentUser?.gpa ? '$0.00' : '$0.00'}
             subtitle="Part-time income"
             icon={DollarSign}
             colorGradient="from-amber-500 to-orange-600"

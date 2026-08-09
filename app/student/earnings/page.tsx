@@ -2,16 +2,19 @@
 
 import React from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
+import { useAuthStore } from '@/store/useAuthStore';
 import { MOCK_EARNINGS } from '@/lib/mockData';
 import { exportToCSV, formatCurrency } from '@/lib/utils';
 import { DollarSign, Download, CheckCircle2, Clock, Calculator } from 'lucide-react';
 
 export default function EarningsPage() {
-  const totalEarned = MOCK_EARNINGS.reduce((acc, curr) => acc + curr.totalAmount, 0);
-  const totalHours = MOCK_EARNINGS.reduce((acc, curr) => acc + curr.hoursWorked, 0);
+  const { currentUser } = useAuthStore();
+  const studentEarnings = MOCK_EARNINGS.filter((e) => e.studentId === currentUser?.id);
+  const totalEarned = studentEarnings.reduce((acc, curr) => acc + curr.totalAmount, 0);
+  const totalHours = studentEarnings.reduce((acc, curr) => acc + curr.hoursWorked, 0);
 
   const handleExportCSV = () => {
-    exportToCSV('campusflex_student_earnings.csv', MOCK_EARNINGS);
+    exportToCSV('campusflex_student_earnings.csv', studentEarnings);
   };
 
   return (
@@ -78,31 +81,39 @@ export default function EarningsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
-                {MOCK_EARNINGS.map((row) => (
-                  <tr key={row.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="p-3.5">
-                      <div className="font-bold text-slate-900 dark:text-slate-100">{row.jobTitle}</div>
-                      <div className="text-[11px] text-slate-400">{row.companyName}</div>
-                    </td>
-                    <td className="p-3.5">{row.hoursWorked} hrs</td>
-                    <td className="p-3.5">${row.hourlyRate}/hr</td>
-                    <td className="p-3.5 font-extrabold text-slate-900 dark:text-slate-100">
-                      {formatCurrency(row.totalAmount)}
-                    </td>
-                    <td className="p-3.5 text-slate-500">{row.date}</td>
-                    <td className="p-3.5">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                          row.status === 'PAID'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : 'bg-amber-100 text-amber-700'
-                        }`}
-                      >
-                        {row.status}
-                      </span>
+                {studentEarnings.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-8 text-center text-slate-500">
+                      No shift payouts recorded yet. Apply for part-time jobs and complete shifts to track your earnings!
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  studentEarnings.map((row) => (
+                    <tr key={row.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <td className="p-3.5">
+                        <div className="font-bold text-slate-900 dark:text-slate-100">{row.jobTitle}</div>
+                        <div className="text-[11px] text-slate-400">{row.companyName}</div>
+                      </td>
+                      <td className="p-3.5">{row.hoursWorked} hrs</td>
+                      <td className="p-3.5">${row.hourlyRate}/hr</td>
+                      <td className="p-3.5 font-extrabold text-slate-900 dark:text-slate-100">
+                        {formatCurrency(row.totalAmount)}
+                      </td>
+                      <td className="p-3.5 text-slate-500">{row.date}</td>
+                      <td className="p-3.5">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                            row.status === 'PAID'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-amber-100 text-amber-700'
+                          }`}
+                        >
+                          {row.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

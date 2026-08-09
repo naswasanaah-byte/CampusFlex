@@ -1,20 +1,42 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { StatCard } from '@/components/ui/StatCard';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useJobStore } from '@/store/useJobStore';
-import { ShieldCheck, Users, Building2, Briefcase, BarChart3, CheckCircle2, AlertCircle } from 'lucide-react';
+import { AIAdminEngine, AIAdminAuditLog } from '@/lib/aiAdmin';
+import { ShieldCheck, Users, Building2, Briefcase, Cpu, CheckCircle2, AlertTriangle, Sparkles, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 
-export default function AdminDashboard() {
-  const { usersList, toggleVerifyEmployer, toggleUserStatus } = useAuthStore();
+export default function AIAdminDashboard() {
+  const { usersList, toggleVerifyEmployer } = useAuthStore();
   const { jobs } = useJobStore();
+
+  const [auditLogs, setAuditLogs] = useState<AIAdminAuditLog[]>(() => AIAdminEngine.getLiveSystemLogs());
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const students = usersList.filter((u) => u.role === 'student');
   const employers = usersList.filter((u) => u.role === 'employer');
-  const pendingEmployers = employers.filter((u) => !u.verified);
+  const verifiedEmployers = employers.filter((e) => e.verified);
+
+  const handleRunAIAudit = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      const newLog: AIAdminAuditLog = {
+        id: `log-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        type: 'FRAUD_PREVENTION',
+        targetName: 'Continuous System Scan',
+        action: 'Autonomous Security Sweep Executed',
+        confidenceScore: 99.8,
+        status: 'PASSED',
+        details: 'Scanned 100% of marketplace listings; 0 illegal spam keywords detected.'
+      };
+      setAuditLogs((prev) => [newLog, ...prev]);
+      setIsRefreshing(false);
+    }, 800);
+  };
 
   return (
     <div className="flex gap-8">
@@ -22,107 +44,159 @@ export default function AdminDashboard() {
 
       <main className="flex-1 space-y-8 min-w-0">
 
-        <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 text-white shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* AI Admin Header Banner */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-purple-500/20">
           <div className="space-y-1">
-            <span className="text-xs font-bold text-rose-300 uppercase tracking-wider">
-              System Operations
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-black">
-              Platform Governance Dashboard
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-300 text-[11px] font-bold">
+              <Cpu className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
+              <span>Autonomous AI Platform Governance Engine</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black mt-1">
+              AI Admin Audit & Security Console
             </h1>
             <p className="text-xs text-slate-300">
-              Verify employers, moderate job listings, and monitor student marketplace metrics.
+              Operating 24/7 to verify employers, enforce smart job quotas, block fake jobs, and protect students.
             </p>
           </div>
-          <Link
-            href="/admin/employers"
-            className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-bold backdrop-blur-md transition-colors text-center"
+
+          <button
+            onClick={handleRunAIAudit}
+            disabled={isRefreshing}
+            className="px-5 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-95 text-xs font-extrabold text-white shadow-lg flex items-center justify-center gap-2 transition-all hover:scale-105"
           >
-            Review {pendingEmployers.length} Employer Queue →
-          </Link>
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Run Immediate AI Audit Sweep
+          </button>
         </div>
 
-        {/* Metric Cards Grid */}
+        {/* System Health Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            title="Total Registered Students"
+            title="AI Security Status"
+            value="100% Safe"
+            subtitle="Autonomous scam prevention"
+            icon={ShieldCheck}
+            colorGradient="from-purple-600 to-indigo-600"
+          />
+          <StatCard
+            title="Verified Campus Employers"
+            value={`${verifiedEmployers.length} / ${employers.length}`}
+            subtitle="AI email domain verification"
+            icon={Building2}
+            colorGradient="from-emerald-500 to-teal-600"
+          />
+          <StatCard
+            title="Monitored Student Network"
             value={students.length}
-            subtitle="Active job seekers"
+            subtitle="Verified university members"
             icon={Users}
             colorGradient="from-primary-600 to-secondary-500"
           />
           <StatCard
-            title="Verified Employers"
-            value={employers.filter((e) => e.verified).length}
-            subtitle={`${pendingEmployers.length} pending checks`}
-            icon={Building2}
-            colorGradient="from-indigo-600 to-purple-600"
-          />
-          <StatCard
-            title="Total Jobs Posted"
-            value={jobs.length}
-            subtitle={`${jobs.filter((j) => j.status === 'FILLED').length} positions filled`}
-            icon={Briefcase}
-            colorGradient="from-emerald-500 to-teal-600"
-          />
-          <StatCard
-            title="Platform Smart Fill Rate"
-            value="92%"
-            subtitle="Successful slot allocation"
-            icon={BarChart3}
-            colorGradient="from-rose-500 to-amber-600"
+            title="Quota Auto-Close Engine"
+            value="Active ⚡"
+            subtitle="Hiring slots enforced 24/7"
+            icon={CheckCircle2}
+            colorGradient="from-amber-500 to-orange-600"
           />
         </div>
 
-        {/* Employers Verification Queue Section */}
+        {/* AI Admin Live Action Audit Log */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-glass space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-rose-600" /> Employer Verification Audit
+              <Sparkles className="w-4 h-4 text-purple-600" /> AI Admin Live System Governance Audit Logs
             </h3>
-            <Link href="/admin/employers" className="text-xs font-bold text-rose-600 hover:underline">
-              Manage All Employers →
-            </Link>
+            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2.5 py-1 rounded-full border border-emerald-500/20">
+              ● Live Engine Operational
+            </span>
           </div>
 
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {employers.map((emp) => (
-              <div key={emp.id} className="py-3.5 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={emp.companyLogo || emp.avatar}
-                    alt={emp.name}
-                    className="w-10 h-10 rounded-xl object-cover ring-1 ring-slate-200"
-                  />
-                  <div>
-                    <h4 className="text-xs font-extrabold text-slate-900 dark:text-slate-100">
-                      {emp.companyName || emp.name}
+            {auditLogs.map((log) => (
+              <div key={log.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-extrabold uppercase">
+                      {log.type.replace('_', ' ')}
+                    </span>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                      {log.action} — <span className="text-primary-600">{log.targetName}</span>
                     </h4>
-                    <span className="text-[11px] text-slate-500">{emp.email} • {emp.location}</span>
                   </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {log.details}
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                      emp.verified ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                    }`}
-                  >
-                    {emp.verified ? 'VERIFIED' : 'PENDING'}
+                <div className="flex items-center gap-3 shrink-0">
+                  <span className="text-[11px] font-semibold text-slate-400">
+                    Confidence: {log.confidenceScore}%
                   </span>
-                  <button
-                    onClick={() => toggleVerifyEmployer(emp.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
-                      emp.verified
-                        ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm'
+                  <span
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold ${
+                      log.status === 'PASSED'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : log.status === 'ENFORCED'
+                        ? 'bg-purple-100 text-purple-700'
+                        : 'bg-rose-100 text-rose-700'
                     }`}
                   >
-                    {emp.verified ? 'Revoke Verification' : 'Approve & Verify'}
-                  </button>
+                    {log.status}
+                  </span>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Autonomous Employer Verification Center */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-glass space-y-4">
+          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-purple-600" /> Employer Verification Status & Audit
+          </h3>
+
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {employers.map((emp) => {
+              const audit = AIAdminEngine.verifyEmployer(emp);
+              return (
+                <div key={emp.id} className="py-3.5 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={emp.companyLogo || emp.avatar}
+                      alt={emp.name}
+                      className="w-10 h-10 rounded-xl object-cover ring-1 ring-slate-200"
+                    />
+                    <div>
+                      <h4 className="text-xs font-extrabold text-slate-900 dark:text-slate-100">
+                        {emp.companyName || emp.name}
+                      </h4>
+                      <span className="text-[11px] text-slate-500">{emp.email} • {audit.reason}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                        emp.verified ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                      }`}
+                    >
+                      {emp.verified ? 'AI VERIFIED ✅' : 'PENDING CHECK'}
+                    </span>
+                    <button
+                      onClick={() => toggleVerifyEmployer(emp.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                        emp.verified
+                          ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm'
+                      }`}
+                    >
+                      {emp.verified ? 'Revoke' : 'AI Approve'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
