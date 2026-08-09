@@ -57,7 +57,7 @@ export const Sidebar: React.FC = () => {
     { label: 'Analytics Reports', href: '/admin/analytics', icon: BarChart3 },
   ];
 
-  const links = role === 'employer' ? employerLinks : role === 'admin' ? adminLinks : studentLinks;
+  const links = role === 'employer' ? employerLinks : studentLinks;
 
   return (
     <aside className="w-64 shrink-0 hidden md:block">
