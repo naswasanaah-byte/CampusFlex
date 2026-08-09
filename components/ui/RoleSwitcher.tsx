@@ -11,7 +11,6 @@ export const RoleSwitcher: React.FC = () => {
   const roles: { role: UserRole; label: string; icon: React.ReactNode; color: string }[] = [
     { role: 'student', label: 'Student', icon: <User className="w-3.5 h-3.5" />, color: 'bg-primary-600 text-white shadow-sm' },
     { role: 'employer', label: 'Employer', icon: <Building2 className="w-3.5 h-3.5" />, color: 'bg-indigo-600 text-white shadow-sm' },
-    { role: 'admin', label: 'Admin', icon: <ShieldCheck className="w-3.5 h-3.5" />, color: 'bg-rose-600 text-white shadow-sm' },
   ];
 
   return (

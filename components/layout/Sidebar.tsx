@@ -49,14 +49,6 @@ export const Sidebar: React.FC = () => {
     { label: 'Company Profile', href: '/employer/profile', icon: Building2 },
   ];
 
-  const adminLinks = [
-    { label: 'Platform Overview', href: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Employer Verification', href: '/admin/employers', icon: ShieldCheck },
-    { label: 'Manage Students', href: '/admin/students', icon: Users },
-    { label: 'Job Moderation', href: '/admin/jobs', icon: Briefcase },
-    { label: 'Analytics Reports', href: '/admin/analytics', icon: BarChart3 },
-  ];
-
   const links = role === 'employer' ? employerLinks : studentLinks;
 
   return (

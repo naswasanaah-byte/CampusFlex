@@ -70,16 +70,6 @@ export const MOCK_USERS: User[] = [
     rating: 4.6,
     status: 'active',
     createdAt: '2025-10-05T09:15:00Z',
-  },
-  {
-    id: 'user-admin-1',
-    name: 'Campus Operations Admin',
-    email: 'admin@campusflex.com',
-    role: 'admin',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&auto=format&fit=crop&q=80',
-    verified: true,
-    status: 'active',
-    createdAt: '2025-01-01T00:00:00Z',
   }
 ];
 

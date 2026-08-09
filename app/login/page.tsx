@@ -27,7 +27,6 @@ export default function LoginPage() {
     const success = login(email, selectedRole);
     if (success) {
       if (selectedRole === 'employer') router.push('/employer/dashboard');
-      else if (selectedRole === 'admin') router.push('/admin/dashboard');
       else router.push('/student/dashboard');
     } else {
       setError('Invalid email credentials. Please check your details.');

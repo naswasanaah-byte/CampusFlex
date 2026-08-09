@@ -17,14 +17,7 @@ export const Navbar: React.FC = () => {
 
   const getDashboardPath = () => {
     if (!currentUser) return '/login';
-    switch (currentUser.role) {
-      case 'employer':
-        return '/employer/dashboard';
-      case 'admin':
-        return '/admin/dashboard';
-      default:
-        return '/student/dashboard';
-    }
+    return currentUser.role === 'employer' ? '/employer/dashboard' : '/student/dashboard';
   };
 
   return (

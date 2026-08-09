@@ -12,7 +12,7 @@ export const NotificationDropdown: React.FC = () => {
   const { notifications, markAsRead, markAllAsRead } = useNotificationStore();
 
   const userNotifs = notifications.filter(
-    (n) => !currentUser || n.userId === currentUser.id || currentUser.role === 'admin'
+    (n) => !currentUser || n.userId === currentUser.id
   );
 
   const unreadCount = userNotifs.filter((n) => !n.read).length;
