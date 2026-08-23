@@ -7,6 +7,8 @@ import { useApplicationStore } from '@/store/useApplicationStore';
 import { useJobStore } from '@/store/useJobStore';
 import { Job } from '@/types';
 import { ApplyModal } from '@/components/jobs/ApplyModal';
+import { MOCK_EARNINGS } from '@/lib/mockData';
+import { calculateAIMatch } from '@/lib/aiEngine';
 import { Sparkles, Calendar, Clock, ArrowRight, MapPin } from 'lucide-react';
 import Link from 'next/link';
 
@@ -18,7 +20,14 @@ export default function StudentDashboard() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isApplyOpen, setIsApplyOpen] = useState(false);
 
+  // Dynamic Applications count per logged in student
   const studentApps = applications.filter((a) => a.studentId === currentUser?.id);
+
+  // Dynamic Earnings calculation per logged in student
+  const studentEarnings = MOCK_EARNINGS.filter((e) => e.studentId === currentUser?.id);
+  const totalEarned = studentEarnings.reduce((acc, curr) => acc + curr.totalAmount, 0);
+
+  // Available Jobs
   const recommendedJobs = jobs.filter((j) => j.status === 'AVAILABLE');
 
   const handleApplyClick = (job: Job) => {
@@ -36,40 +45,40 @@ export default function StudentDashboard() {
 
       <main className="flex-1 space-y-6 min-w-0">
 
-        {/* Welcome Header (Matching Mockup Screen 2) */}
+        {/* Welcome Header */}
         <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-glass flex items-center justify-between">
           <div className="space-y-1">
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-              Hello, {currentUser?.name || 'Ananya'}! 👋
+              Hello, {currentUser?.name || 'Student'}! 👋
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Find the best part-time jobs that fits your schedule and skills.
+              Find the best part-time jobs that fit your schedule and skills.
             </p>
           </div>
         </div>
 
-        {/* 3 Summary Stat Cards (Matching Mockup Screen 2) */}
+        {/* 3 Dynamic Summary Stat Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-glass space-y-1">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Jobs Recommended</span>
-            <div className="text-3xl font-black text-slate-900 dark:text-white">12</div>
+            <div className="text-3xl font-black text-slate-900 dark:text-white">{recommendedJobs.length}</div>
             <p className="text-[11px] text-slate-400">New jobs for you</p>
           </div>
 
           <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-glass space-y-1">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Applications</span>
-            <div className="text-3xl font-black text-slate-900 dark:text-white">5</div>
+            <div className="text-3xl font-black text-slate-900 dark:text-white">{studentApps.length}</div>
             <p className="text-[11px] text-slate-400">Total applied</p>
           </div>
 
           <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-glass space-y-1">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Earnings</span>
-            <div className="text-3xl font-black text-[#5B46E5]">₹4,250</div>
+            <div className="text-3xl font-black text-[#5B46E5]">₹{totalEarned.toLocaleString('en-IN')}</div>
             <p className="text-[11px] text-slate-400">Total earned</p>
           </div>
         </div>
 
-        {/* Top Recommended Jobs Section (Matching Mockup Screen 2) */}
+        {/* Top Recommended Jobs Section with Dynamic AI Match Calculation */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-glass space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
@@ -81,9 +90,8 @@ export default function StudentDashboard() {
           </div>
 
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {recommendedJobs.slice(0, 4).map((job, idx) => {
-              const matchScores = [95, 90, 92, 88];
-              const score = matchScores[idx % matchScores.length];
+            {recommendedJobs.slice(0, 4).map((job) => {
+              const aiMatch = calculateAIMatch(currentUser, job);
               return (
                 <div
                   key={job.id}
@@ -111,9 +119,15 @@ export default function StudentDashboard() {
                       <div className="text-[11px] text-slate-400">5 PM – 7 PM</div>
                     </div>
 
-                    <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-600 border border-emerald-200">
-                      {score}% Match
-                    </span>
+                    {aiMatch.score > 0 ? (
+                      <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-600 border border-emerald-200">
+                        {aiMatch.score}% Match
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-blue-50 text-blue-600 border border-blue-200">
+                        Available
+                      </span>
+                    )}
                   </div>
                 </div>
               );

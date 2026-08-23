@@ -74,35 +74,43 @@ export const Sidebar: React.FC = () => {
           </span>
         </Link>
 
-        {/* Student Avatar Card & Profile Completion Bar (Matching Mockup) */}
-        <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 space-y-3">
-          <div className="flex items-center gap-3">
-            <img
-              src={currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'}
-              alt={currentUser.name}
-              className="w-12 h-12 rounded-full object-cover ring-2 ring-indigo-400/40 shrink-0"
-            />
-            <div className="min-w-0 flex-1">
-              <h4 className="text-sm font-black text-white truncate">
-                {currentUser.name || 'Ananya Nair'}
-              </h4>
-              <p className="text-[11px] text-indigo-200 truncate">
-                {currentUser.department || 'Computer Science'} • {currentUser.year || 'Semester 4'}
-              </p>
-            </div>
-          </div>
+        {/* Student Avatar Card & Profile Completion Bar */}
+        {(() => {
+          const completion = (currentUser.skills && currentUser.skills.length > 0) ? 80 : 35;
+          return (
+            <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 space-y-3">
+              <div className="flex items-center gap-3">
+                <img
+                  src={currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'}
+                  alt={currentUser.name}
+                  className="w-12 h-12 rounded-full object-cover ring-2 ring-indigo-400/40 shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-sm font-black text-white truncate">
+                    {currentUser.name}
+                  </h4>
+                  <p className="text-[11px] text-indigo-200 truncate">
+                    {currentUser.department || 'Student'} • {currentUser.year || 'Member'}
+                  </p>
+                </div>
+              </div>
 
-          {/* Profile Completion Bar (80%) */}
-          <div className="space-y-1 pt-1 border-t border-white/10">
-            <div className="flex items-center justify-between text-[10px] font-bold text-indigo-200">
-              <span>Profile Completion</span>
-              <span className="text-indigo-300">80%</span>
+              {/* Profile Completion Bar */}
+              <div className="space-y-1 pt-1 border-t border-white/10">
+                <div className="flex items-center justify-between text-[10px] font-bold text-indigo-200">
+                  <span>Profile Completion</span>
+                  <span className="text-indigo-300">{completion}%</span>
+                </div>
+                <div className="w-full h-1.5 bg-indigo-950/80 rounded-full overflow-hidden">
+                  <div
+                    style={{ width: `${completion}%` }}
+                    className="h-full bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full transition-all duration-500"
+                  />
+                </div>
+              </div>
             </div>
-            <div className="w-full h-1.5 bg-indigo-950/80 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full w-[80%]" />
-            </div>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Navigation Links (Matching Mockup Sidebar) */}
         <nav className="space-y-1">
