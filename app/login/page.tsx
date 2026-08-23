@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -9,16 +9,14 @@ import {
   GraduationCap,
   Mail,
   Lock,
-  User,
-  Building2,
-  ArrowRight,
-  AlertCircle,
-  CheckCircle2,
   Eye,
   EyeOff,
-  Sparkles
+  Sparkles,
+  AlertCircle,
+  CheckCircle2
 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
+import { InteractiveMascot } from '@/components/ui/InteractiveMascot';
 import { motion } from 'framer-motion';
 
 export default function LoginPage() {
@@ -35,12 +33,30 @@ export default function LoginPage() {
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
 
+  // Field focus tracking for Mascot animations
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+
+  // Mouse Tracking for 3D Login Pad Tilt & Parallax
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0, normalizedX: 0, normalizedY: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const normalizedX = (x / rect.width - 0.5) * 2; // -1 to 1
+    const normalizedY = (y / rect.height - 0.5) * 2; // -1 to 1
+    setMousePos({ x, y, normalizedX, normalizedY });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (!email.trim()) {
-      setError('Please enter your email or phone.');
+      setError('Please enter your email address.');
       return;
     }
 
@@ -63,180 +79,235 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center py-6 px-3 sm:px-6">
-      <div className="max-w-4xl w-full bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+    <div
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      className="relative min-h-[85vh] flex items-center justify-center py-6 px-3 sm:px-6 overflow-hidden select-none"
+    >
+      {/* Ambient Glowing Orbs Following Mouse */}
+      <motion.div
+        animate={{
+          x: mousePos.normalizedX * 40,
+          y: mousePos.normalizedY * 40,
+        }}
+        transition={{ type: 'spring', stiffness: 75, damping: 25 }}
+        className="absolute top-10 left-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-[#5B46E5]/20 rounded-full blur-[100px] pointer-events-none"
+      />
+      <motion.div
+        animate={{
+          x: mousePos.normalizedX * -50,
+          y: mousePos.normalizedY * -50,
+        }}
+        transition={{ type: 'spring', stiffness: 60, damping: 20 }}
+        className="absolute bottom-10 right-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-purple-500/20 rounded-full blur-[100px] pointer-events-none"
+      />
 
-        {/* LEFT COLUMN: 3D STUDENT ILLUSTRATION & BRAND BANNER (MATCHING MOCKUP SCREEN 1) */}
-        <div className="relative bg-gradient-to-br from-indigo-50 via-purple-50 to-slate-100 dark:from-slate-800 dark:to-indigo-950 p-8 flex flex-col justify-between overflow-hidden border-b md:border-b-0 md:border-r border-slate-200/60 dark:border-slate-800">
-          {/* Top Brand Logo */}
-          <div className="relative z-10 space-y-1">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-2xl bg-[#5B46E5] flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-                <GraduationCap className="w-6 h-6" />
+      {/* Mouse Cursor Spotlight Glow */}
+      <div
+        className="hidden md:block absolute w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none transition-opacity duration-300"
+        style={{
+          left: `${mousePos.x - 160}px`,
+          top: `${mousePos.y - 160}px`,
+        }}
+      />
+
+      {/* 3D LOGIN PAD CONTAINER - MOVES & TILTS IN DIRECTION OF MOUSE ARROW */}
+      <motion.div
+        style={{
+          transform: `perspective(1000px) rotateX(${mousePos.normalizedY * -5}deg) rotateY(${mousePos.normalizedX * 5}deg) translate3d(${mousePos.normalizedX * 12}px, ${mousePos.normalizedY * 12}px, 0px)`,
+        }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+        className="relative z-10 max-w-4xl w-full"
+      >
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl border border-slate-200/90 dark:border-slate-800/90 shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+
+          {/* LEFT COLUMN: BRAND BANNER & 3D STUDENT ILLUSTRATION */}
+          <div className="relative bg-gradient-to-br from-indigo-50 via-purple-50 to-slate-100 dark:from-slate-800 dark:to-indigo-950 p-8 flex flex-col justify-between overflow-hidden border-b md:border-b-0 md:border-r border-slate-200/60 dark:border-slate-800">
+            {/* Top Brand Logo */}
+            <div className="relative z-10 space-y-1">
+              <Link href="/" className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-2xl bg-[#5B46E5] flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                  <GraduationCap className="w-6 h-6" />
+                </div>
+                <span className="text-2xl font-black text-slate-900 dark:text-white">
+                  CampusFlex
+                </span>
+              </Link>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 pl-1">
+                Smart Jobs. Flexible Future.
+              </p>
+            </div>
+
+            {/* Center 3D Student Character Banner Illustration */}
+            <div className="relative my-6 flex items-center justify-center">
+              <div className="relative w-60 h-60 sm:w-64 sm:h-64 rounded-3xl overflow-hidden shadow-2xl ring-4 ring-white/60 dark:ring-slate-800">
+                <img
+                  src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&auto=format&fit=crop&q=80"
+                  alt="Campus Students Illustration"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-indigo-950/60 via-transparent to-transparent flex items-end p-4">
+                  <p className="text-white text-xs font-extrabold drop-shadow-md">
+                    Join 10,000+ university students finding flexible part-time jobs today!
+                  </p>
+                </div>
               </div>
-              <span className="text-2xl font-black text-slate-900 dark:text-white">
-                CampusFlex
-              </span>
-            </Link>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 pl-1">
-              Smart Jobs. Flexible Future.
-            </p>
+            </div>
+
+            {/* Bottom Badge */}
+            <div className="relative z-10 flex items-center gap-2 text-[11px] font-bold text-indigo-600 dark:text-indigo-300">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>AI Match & Guaranteed Hourly Shift Payouts</span>
+            </div>
           </div>
 
-          {/* Center 3D Student Character Banner Illustration */}
-          <div className="relative my-8 flex items-center justify-center">
-            <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-3xl overflow-hidden shadow-2xl ring-4 ring-white/60 dark:ring-slate-800">
-              <img
-                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&auto=format&fit=crop&q=80"
-                alt="Campus Students Illustration"
-                className="w-full h-full object-cover"
+          {/* RIGHT COLUMN: INTERACTIVE LOGIN PAD FORM */}
+          <div className="p-6 sm:p-8 flex flex-col justify-center space-y-4">
+
+            {/* Interactive Staring Cartoon Mascot Character */}
+            <div className="pt-1">
+              <InteractiveMascot
+                isEmailFocused={isEmailFocused}
+                isPasswordFocused={isPasswordFocused}
+                isPasswordVisible={showPassword}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-indigo-950/60 via-transparent to-transparent flex items-end p-4">
-                <p className="text-white text-xs font-extrabold drop-shadow-md">
-                  Join 10,000+ university students finding flexible part-time jobs today!
-                </p>
-              </div>
             </div>
-          </div>
 
-          {/* Bottom Badge */}
-          <div className="relative z-10 flex items-center gap-2 text-[11px] font-bold text-indigo-600 dark:text-indigo-300">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <span>AI Match & Guaranteed Hourly Shift Payouts</span>
-          </div>
-        </div>
+            {/* Welcome Header */}
+            <div className="text-center space-y-0.5">
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+                Welcome Back!
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                Login to continue to your portal
+              </p>
+            </div>
 
-        {/* RIGHT COLUMN: SLEEK LOGIN FORM (MATCHING MOCKUP SCREEN 1) */}
-        <div className="p-8 sm:p-10 flex flex-col justify-center space-y-6">
-
-          {/* Welcome Header */}
-          <div className="text-center space-y-1">
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-              Welcome Back!
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Login to continue
-            </p>
-          </div>
-
-          {/* Error Alert */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center gap-2"
-            >
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{error}</span>
-            </motion.div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-
-            {/* Role Switcher Tabs (Student / Employer) */}
-            <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl">
-              <button
-                type="button"
-                onClick={() => setSelectedRole('student')}
-                className={`py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
-                  selectedRole === 'student'
-                    ? 'bg-[#5B46E5] text-white shadow-md'
-                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-                }`}
+            {/* Error Alert */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-semibold flex items-center gap-2"
               >
-                Student
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedRole('employer')}
-                className={`py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
-                  selectedRole === 'employer'
-                    ? 'bg-[#5B46E5] text-white shadow-md'
-                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-                }`}
-              >
-                Employer
-              </button>
-            </div>
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{error}</span>
+              </motion.div>
+            )}
 
-            {/* Email or Phone Input */}
-            <div className="space-y-1">
-              <div className="relative group">
-                <Mail className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-[#5B46E5] transition-colors" />
-                <input
-                  type="text"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email or Phone"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B46E5] transition-all"
-                />
-              </div>
-            </div>
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-3.5">
 
-            {/* Password Input with Eye Icon */}
-            <div className="space-y-1">
-              <div className="relative group">
-                <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-[#5B46E5] transition-colors" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className="w-full pl-10 pr-11 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B46E5] transition-all"
-                />
+              {/* Role Switcher Tabs (Student / Employer) */}
+              <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl">
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  onClick={() => setSelectedRole('student')}
+                  className={`py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+                    selectedRole === 'student'
+                      ? 'bg-[#5B46E5] text-white shadow-md'
+                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                  }`}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  Student
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('employer')}
+                  className={`py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+                    selectedRole === 'employer'
+                      ? 'bg-[#5B46E5] text-white shadow-md'
+                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                  }`}
+                >
+                  Employer
                 </button>
               </div>
-            </div>
 
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between text-xs pt-1">
-              <label className="flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#5B46E5] focus:ring-[#5B46E5]"
-                />
-                <span>Remember me</span>
-              </label>
-              <button
-                type="button"
-                onClick={() => setForgotModalOpen(true)}
-                className="font-bold text-[#5B46E5] hover:underline"
+              {/* Email Input */}
+              <div className="space-y-1">
+                <div className="relative group">
+                  <Mail className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-[#5B46E5] transition-colors" />
+                  <input
+                    type="text"
+                    required
+                    value={email}
+                    onFocus={() => setIsEmailFocused(true)}
+                    onBlur={() => setIsEmailFocused(false)}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Email or Phone"
+                    className="w-full pl-10 pr-4 py-3 min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-base sm:text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B46E5] transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Password Input with Eye Icon */}
+              <div className="space-y-1">
+                <div className="relative group">
+                  <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-[#5B46E5] transition-colors" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onFocus={() => setIsPasswordFocused(true)}
+                    onBlur={() => setIsPasswordFocused(false)}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="w-full pl-10 pr-11 py-3 min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-base sm:text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B46E5] transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Remember Me & Forgot Password */}
+              <div className="flex items-center justify-between text-xs pt-0.5">
+                <label className="flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 rounded text-[#5B46E5] focus:ring-[#5B46E5]"
+                  />
+                  <span>Remember me</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setForgotModalOpen(true)}
+                  className="font-bold text-[#5B46E5] hover:underline"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+
+              {/* Solid Purple Login Button */}
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                className="w-full py-3.5 min-h-[48px] text-xs font-black text-white bg-[#5B46E5] hover:bg-indigo-700 rounded-2xl shadow-lg shadow-indigo-500/25 transition-all cursor-pointer"
               >
-                Forgot Password?
-              </button>
+                Login
+              </motion.button>
+            </form>
+
+            {/* Footer Register Link */}
+            <div className="text-center text-xs text-slate-500 dark:text-slate-400 pt-1">
+              Don't have an account?{' '}
+              <Link href="/register" className="font-extrabold text-[#5B46E5] hover:underline">
+                Register Now
+              </Link>
             </div>
 
-            {/* Solid Purple Login Button */}
-            <button
-              type="submit"
-              className="w-full py-3.5 text-xs font-black text-white bg-[#5B46E5] hover:bg-indigo-700 rounded-2xl shadow-lg shadow-indigo-500/25 transition-all cursor-pointer mt-2"
-            >
-              Login
-            </button>
-          </form>
-
-          {/* Footer Register Link */}
-          <div className="text-center text-xs text-slate-500 dark:text-slate-400 pt-2">
-            Don't have an account?{' '}
-            <Link href="/register" className="font-extrabold text-[#5B46E5] hover:underline">
-              Register Now
-            </Link>
           </div>
 
         </div>
-
-      </div>
+      </motion.div>
 
       {/* Forgot Password Modal */}
       <Modal
