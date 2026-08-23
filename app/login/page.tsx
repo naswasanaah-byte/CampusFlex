@@ -17,9 +17,10 @@ import {
   Eye,
   EyeOff,
   Zap,
-  ShieldCheck
+  Smartphone
 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
+import { InteractiveMascot } from '@/components/ui/InteractiveMascot';
 import { motion } from 'framer-motion';
 
 export default function LoginPage() {
@@ -35,7 +36,11 @@ export default function LoginPage() {
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
 
-  // Mouse Position Tracking for Interactive Parallax & Glowing Cursor Trail
+  // Field focus tracking for Mascot animations
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+
+  // Mouse Tracking for Parallax Background
   const containerRef = useRef<HTMLDivElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0, normalizedX: 0, normalizedY: 0 });
 
@@ -44,8 +49,8 @@ export default function LoginPage() {
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const normalizedX = (x / rect.width - 0.5) * 2; // -1 to 1
-    const normalizedY = (y / rect.height - 0.5) * 2; // -1 to 1
+    const normalizedX = (x / rect.width - 0.5) * 2;
+    const normalizedY = (y / rect.height - 0.5) * 2;
     setMousePos({ x, y, normalizedX, normalizedY });
   };
 
@@ -63,7 +68,7 @@ export default function LoginPage() {
       if (selectedRole === 'employer') router.push('/employer/dashboard');
       else router.push('/student/dashboard');
     } else {
-      setError('Invalid credentials. Please check your email and password.');
+      setError('Invalid credentials. Please check your details.');
     }
   };
 
@@ -86,75 +91,65 @@ export default function LoginPage() {
     <div
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="relative min-h-[85vh] flex items-center justify-center py-12 px-4 overflow-hidden select-none"
+      className="relative min-h-[85vh] flex items-center justify-center py-6 px-3 sm:py-12 sm:px-6 overflow-hidden select-none"
     >
-      {/* 1. MOUSE-FOLLOWING INTERACTIVE GLOWING ORBS & PARALLAX BACKGROUND */}
+      {/* 1. AMBIENT GLOWING BACKGROUND ORBS (PARALLAX EFFECT) */}
       <motion.div
         animate={{
-          x: mousePos.normalizedX * 40,
-          y: mousePos.normalizedY * 40,
+          x: mousePos.normalizedX * 35,
+          y: mousePos.normalizedY * 35,
         }}
         transition={{ type: 'spring', stiffness: 75, damping: 25 }}
-        className="absolute top-10 left-1/4 w-96 h-96 bg-primary-600/25 rounded-full blur-[100px] pointer-events-none"
+        className="absolute top-10 left-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-primary-600/25 rounded-full blur-[100px] pointer-events-none"
       />
       <motion.div
         animate={{
-          x: mousePos.normalizedX * -50,
-          y: mousePos.normalizedY * -50,
+          x: mousePos.normalizedX * -45,
+          y: mousePos.normalizedY * -45,
         }}
         transition={{ type: 'spring', stiffness: 60, damping: 20 }}
-        className="absolute bottom-10 right-1/4 w-96 h-96 bg-secondary-500/25 rounded-full blur-[100px] pointer-events-none"
-      />
-      <motion.div
-        animate={{
-          x: mousePos.normalizedX * 25,
-          y: mousePos.normalizedY * 25,
-        }}
-        transition={{ type: 'spring', stiffness: 90, damping: 30 }}
-        className="absolute top-1/3 right-10 w-72 h-72 bg-purple-500/20 rounded-full blur-[90px] pointer-events-none"
+        className="absolute bottom-10 right-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-secondary-500/25 rounded-full blur-[100px] pointer-events-none"
       />
 
-      {/* Interactive Cursor Spotlight Trail */}
+      {/* Cursor Spotlight Effect */}
       <div
-        className="absolute w-80 h-80 bg-primary-400/15 rounded-full blur-3xl pointer-events-none transition-opacity duration-300"
+        className="hidden md:block absolute w-80 h-80 bg-primary-400/15 rounded-full blur-3xl pointer-events-none transition-opacity duration-300"
         style={{
           left: `${mousePos.x - 160}px`,
           top: `${mousePos.y - 160}px`,
         }}
       />
 
-      {/* 2. 3D CARD CONTAINER WITH MOUSE PARALLAX TILT */}
+      {/* 2. MAIN MOBILE-OPTIMIZED LOGIN CARD */}
       <motion.div
         style={{
-          transform: `perspective(1000px) rotateX(${mousePos.normalizedY * -4}deg) rotateY(${mousePos.normalizedX * 4}deg)`,
+          transform: `perspective(1000px) rotateX(${mousePos.normalizedY * -3}deg) rotateY(${mousePos.normalizedX * 3}deg)`,
         }}
         transition={{ type: 'spring', stiffness: 100, damping: 20 }}
         className="relative z-10 max-w-md w-full"
       >
-        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-8 shadow-2xl space-y-6 transition-all duration-300 hover:shadow-primary-500/10">
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl border border-slate-200/90 dark:border-slate-800/90 p-5 sm:p-8 shadow-2xl space-y-5">
+
+          {/* Interactive Mascot Cartoon Character */}
+          <div className="pt-1">
+            <InteractiveMascot
+              isEmailFocused={isEmailFocused}
+              isPasswordFocused={isPasswordFocused}
+              isPasswordVisible={showPassword}
+            />
+          </div>
 
           {/* Brand Header */}
-          <div className="text-center space-y-2">
-            <motion.div
-              animate={{
-                rotate: [0, 5, -5, 0],
-                scale: [1, 1.05, 1],
-              }}
-              transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut' }}
-              className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary-600 via-primary-500 to-secondary-500 flex items-center justify-center text-white mx-auto shadow-lg shadow-primary-500/30"
-            >
-              <Sparkles className="w-7 h-7" />
-            </motion.div>
-
-            <h2 className="text-3xl font-black bg-gradient-to-r from-slate-900 via-primary-950 to-slate-900 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
-              Welcome Back
+          <div className="text-center space-y-1">
+            <h2 className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-slate-900 via-primary-950 to-slate-900 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+              Welcome to CampusFlex
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Sign in to your CampusFlex portal to manage jobs, applications, and work IDs.
+              Smart Jobs. Flexible Future. Sign in to your portal.
             </p>
           </div>
 
-          {/* Error Banner */}
+          {/* Error Alert Banner */}
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -169,40 +164,40 @@ export default function LoginPage() {
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
 
-            {/* Role Selection Tabs */}
-            <div className="space-y-1.5">
+            {/* Role Selection Tabs (Big Touch-Friendly Targets) */}
+            <div className="space-y-1">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                <span>Select Account Role</span>
-                <span className="text-[10px] text-slate-400 font-normal">Student or Employer</span>
+                <span>Account Role</span>
+                <span className="text-[10px] text-slate-400 font-normal">Student / Employer</span>
               </label>
               <div className="grid grid-cols-2 gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
                 <button
                   type="button"
                   onClick={() => setSelectedRole('student')}
-                  className={`py-2 text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all ${
+                  className={`min-h-[44px] text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
                     selectedRole === 'student'
-                      ? 'bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 shadow-md scale-[1.02]'
+                      ? 'bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 shadow-md'
                       : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
                   }`}
                 >
-                  <User className="w-4 h-4" /> Student Portal
+                  <User className="w-4 h-4" /> Student
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedRole('employer')}
-                  className={`py-2 text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all ${
+                  className={`min-h-[44px] text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
                     selectedRole === 'employer'
-                      ? 'bg-white dark:bg-slate-900 text-secondary-600 dark:text-secondary-400 shadow-md scale-[1.02]'
+                      ? 'bg-white dark:bg-slate-900 text-secondary-600 dark:text-secondary-400 shadow-md'
                       : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
                   }`}
                 >
-                  <Building2 className="w-4 h-4" /> Employer Portal
+                  <Building2 className="w-4 h-4" /> Employer
                 </button>
               </div>
             </div>
 
             {/* Email Input */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 Email Address
               </label>
@@ -212,15 +207,17 @@ export default function LoginPage() {
                   type="email"
                   required
                   value={email}
+                  onFocus={() => setIsEmailFocused(true)}
+                  onBlur={() => setIsEmailFocused(false)}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={selectedRole === 'student' ? 'alex.rivera@university.edu' : 'hiring@company.com'}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                  className="w-full pl-10 pr-4 py-3 min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-base sm:text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                 />
               </div>
             </div>
 
             {/* Password Input with Show/Hide Toggle */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                   Password
@@ -239,57 +236,60 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
+                  onFocus={() => setIsPasswordFocused(true)}
+                  onBlur={() => setIsPasswordFocused(false)}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                  className="w-full pl-10 pr-11 py-3 min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-base sm:text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            {/* Demo Fill Helper Chips */}
-            <div className="pt-1 flex items-center justify-between text-[11px] text-slate-500">
-              <span className="font-semibold text-slate-400">Quick Fill Demo:</span>
-              <div className="flex gap-2">
+            {/* One-Touch Quick Fill Helper Buttons (Touch Friendly) */}
+            <div className="p-2.5 rounded-2xl bg-slate-100/70 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/40 space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block text-center">
+                ⚡ Quick Fill Test Credentials:
+              </span>
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => handleQuickFillDemo('alex.rivera@university.edu', 'student')}
-                  className="text-primary-600 hover:underline font-bold"
+                  className="py-1.5 px-2 rounded-xl bg-primary-600/10 hover:bg-primary-600/20 text-primary-700 dark:text-primary-300 text-[11px] font-bold text-center border border-primary-500/20 transition-colors cursor-pointer"
                 >
                   Student Demo
                 </button>
-                <span>•</span>
                 <button
                   type="button"
                   onClick={() => handleQuickFillDemo('hiring@techcorp.com', 'employer')}
-                  className="text-secondary-600 hover:underline font-bold"
+                  className="py-1.5 px-2 rounded-xl bg-secondary-600/10 hover:bg-secondary-600/20 text-secondary-700 dark:text-secondary-300 text-[11px] font-bold text-center border border-secondary-500/20 transition-colors cursor-pointer"
                 >
                   Employer Demo
                 </button>
               </div>
             </div>
 
-            {/* Submit Button */}
+            {/* Large Touch Submit Button */}
             <motion.button
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full py-3.5 text-xs font-black text-white bg-gradient-to-r from-primary-600 via-primary-500 to-secondary-500 rounded-2xl shadow-lg shadow-primary-500/25 hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
+              className="w-full min-h-[48px] py-3.5 text-xs sm:text-sm font-black text-white bg-gradient-to-r from-primary-600 via-primary-500 to-secondary-500 rounded-2xl shadow-lg shadow-primary-500/25 hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Sign In to {selectedRole.toUpperCase()} Portal</span>
               <ArrowRight className="w-4 h-4" />
             </motion.button>
           </form>
 
-          {/* Register Prompt */}
-          <div className="text-center text-xs text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-100 dark:border-slate-800">
-            Don't have an account yet?{' '}
+          {/* Register Link */}
+          <div className="text-center text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
+            Don't have an account?{' '}
             <Link href="/register" className="font-extrabold text-primary-600 dark:text-primary-400 hover:underline">
               Create Free Account
             </Link>
@@ -298,7 +298,7 @@ export default function LoginPage() {
         </div>
       </motion.div>
 
-      {/* Forgot Password Modal */}
+      {/* Password Reset Modal */}
       <Modal
         isOpen={forgotModalOpen}
         onClose={() => setForgotModalOpen(false)}
@@ -325,12 +325,12 @@ export default function LoginPage() {
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
                 placeholder="name@university.edu"
-                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3.5 py-3 min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
             <button
               type="submit"
-              className="w-full py-3 text-xs font-bold text-white bg-primary-600 rounded-xl shadow-md hover:bg-primary-700 transition-colors"
+              className="w-full py-3 min-h-[48px] text-xs font-bold text-white bg-primary-600 rounded-xl shadow-md hover:bg-primary-700 transition-colors"
             >
               Send Reset Password Link
             </button>
