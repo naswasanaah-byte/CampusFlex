@@ -2,228 +2,176 @@
 
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { Sidebar } from '@/components/layout/Sidebar';
 import { useJobStore } from '@/store/useJobStore';
-import { useAuthStore } from '@/store/useAuthStore';
-import { SmartJobBadge } from '@/components/jobs/SmartJobBadge';
 import { ApplyModal } from '@/components/jobs/ApplyModal';
-import { calculateAIMatch } from '@/lib/aiEngine';
-import { formatCurrency, formatDate } from '@/lib/utils';
-import {
-  Building2,
-  MapPin,
-  Clock,
-  DollarSign,
-  ShieldCheck,
-  Sparkles,
-  Bookmark,
-  Share2,
-  ArrowLeft,
-  CheckCircle2,
-  AlertCircle
-} from 'lucide-react';
-import Link from 'next/link';
+import { ArrowLeft, Bookmark, DollarSign, Calendar, Clock, MapPin, CheckCircle2, Sparkles } from 'lucide-react';
 
 export default function JobDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const jobId = params.id as string;
-
   const { jobs, savedJobIds, toggleSaveJob } = useJobStore();
-  const { currentUser } = useAuthStore();
+
+  const jobId = params?.id as string;
+  const job = jobs.find((j) => j.id === jobId) || jobs[0];
 
   const [isApplyOpen, setIsApplyOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  const job = jobs.find((j) => j.id === jobId);
-
-  if (!job) {
-    return (
-      <div className="py-20 text-center space-y-4">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Job Not Found</h2>
-        <Link href="/jobs" className="text-sm font-bold text-primary-600 hover:underline">
-          ← Return to Marketplace
-        </Link>
-      </div>
-    );
-  }
-
   const isSaved = savedJobIds.includes(job.id);
-  const isStudent = currentUser?.role === 'student';
-  const isFilled = job.status === 'FILLED' || job.selectedEmployees >= job.requiredEmployees;
-  const aiMatch = currentUser ? calculateAIMatch(currentUser, job) : { score: 92, reasons: ['Matches skill set'] };
-
-  const handleShare = () => {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
+  const getCompanyInitials = (name: string) => name.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase();
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="flex gap-8">
+      <Sidebar />
 
-      {/* Back Button */}
-      <button
-        onClick={() => router.back()}
-        className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to Jobs
-      </button>
+      <main className="flex-1 space-y-6 min-w-0">
 
-      {/* Main Header Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-8 shadow-glass space-y-6">
+        {/* Back Navigation Bar & Bookmark Action */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => router.back()}
+            className="px-4 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Jobs
+          </button>
+          <button
+            onClick={() => toggleSaveJob(job.id)}
+            className="p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition-colors"
+          >
+            <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-[#5B46E5] text-[#5B46E5]' : 'text-slate-400'}`} />
+          </button>
+        </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <img
-              src={job.companyLogo}
-              alt={job.companyName}
-              className="w-16 h-16 rounded-2xl object-cover ring-2 ring-primary-500/20 shadow-md"
-            />
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100">
+        {/* Main Job Detail Card (Matching Mockup Screen 4) */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-8 shadow-glass space-y-8">
+
+          {/* Job Title Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-slate-900 text-white font-black text-xl flex items-center justify-center shrink-0 shadow-lg">
+                {getCompanyInitials(job.companyName)}
+              </div>
+              <div>
+                <h1 className="text-2xl font-black text-slate-900 dark:text-white">
                   {job.title}
                 </h1>
+                <p className="text-sm font-semibold text-slate-500">
+                  {job.companyName}
+                </p>
               </div>
-              <p className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1.5 mt-1">
-                {job.companyName} <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                <span className="text-slate-300">•</span>
-                <MapPin className="w-3.5 h-3.5 text-slate-400" /> {job.location}
-              </p>
+            </div>
+
+            <span className="px-4 py-1.5 rounded-full text-sm font-black bg-emerald-50 text-emerald-600 border border-emerald-200 self-start sm:self-center">
+              95% Match
+            </span>
+          </div>
+
+          {/* 4 Stat Pills Grid (Matching Mockup Screen 4) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                <DollarSign className="w-3.5 h-3.5 text-emerald-500" /> Salary
+              </span>
+              <div className="text-sm font-extrabold text-slate-900 dark:text-white">
+                ₹{job.hourlyRate} / day
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-indigo-500" /> Days
+              </span>
+              <div className="text-sm font-extrabold text-slate-900 dark:text-white">
+                Mon, Wed, Fri
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-amber-500" /> Time
+              </span>
+              <div className="text-sm font-extrabold text-slate-900 dark:text-white">
+                5 PM – 7 PM
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 text-purple-500" /> Location
+              </span>
+              <div className="text-sm font-extrabold text-slate-900 dark:text-white truncate">
+                {job.location}
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleShare}
-              className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-              title="Share Job Link"
-            >
-              <Share2 className="w-4 h-4" />
-            </button>
-            {isStudent && (
-              <button
-                onClick={() => toggleSaveJob(job.id)}
-                className={`p-3 rounded-2xl border transition-colors ${
-                  isSaved
-                    ? 'bg-primary-50 dark:bg-primary-950/60 border-primary-300 text-primary-600'
-                    : 'border-slate-200 dark:border-slate-800 text-slate-500 hover:bg-slate-100'
-                }`}
-                title="Save Job"
-              >
-                <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-primary-600' : ''}`} />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Smart Job Quota Banner */}
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="text-2xl font-black text-primary-600 dark:text-primary-400">
-              {formatCurrency(job.hourlyRate)}
-              <span className="text-xs font-normal text-slate-500">/hr</span>
-            </div>
-            <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block" />
-            <SmartJobBadge
-              requiredEmployees={job.requiredEmployees}
-              selectedEmployees={job.selectedEmployees}
-              status={job.status}
-              size="lg"
-            />
+          {/* Job Description (Matching Mockup Screen 4) */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+              Job Description
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              {job.description}
+            </p>
           </div>
 
-          {/* Apply Button or Filled Warning */}
-          {isFilled ? (
-            <div className="px-4 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 text-rose-600 text-xs font-bold flex items-center gap-1.5">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              This position has already been filled.
-            </div>
-          ) : (
-            isStudent && (
-              <button
-                onClick={() => setIsApplyOpen(true)}
-                className="px-6 py-3 text-xs font-extrabold text-white bg-gradient-to-r from-primary-600 to-secondary-500 rounded-2xl shadow-lg hover:opacity-95 transition-opacity"
-              >
-                Apply Now ({job.requiredEmployees - job.selectedEmployees} slots left)
-              </button>
-            )
-          )}
-        </div>
+          {/* Requirements List (Matching Mockup Screen 4) */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+              Requirements
+            </h3>
+            <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300 font-medium">
+              {job.requirements.map((req) => (
+                <li key={req} className="flex items-start gap-2">
+                  <span className="text-[#5B46E5] font-black">•</span>
+                  <span>{req}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* AI Profile Match Breakdown */}
-        {isStudent && (
-          <div className="p-5 rounded-3xl bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-950/40 dark:to-secondary-950/40 border border-primary-200 dark:border-primary-800 space-y-2">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary-600 animate-pulse" />
-              <h3 className="text-sm font-extrabold text-primary-800 dark:text-primary-200">
-                AI Recommendation: {aiMatch.score}% Profile Match
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-              {aiMatch.reasons.map((reason, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span>{reason}</span>
-                </div>
+          {/* Skills Required Chips (Matching Mockup Screen 4) */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+              Skills Required
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {job.skillsRequired.map((skill) => (
+                <span
+                  key={skill}
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold"
+                >
+                  {skill}
+                </span>
               ))}
             </div>
           </div>
-        )}
 
-        {/* Description Section */}
-        <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-            Job Description
-          </h3>
-          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
-            {job.description}
-          </p>
-        </div>
-
-        {/* Requirements Section */}
-        <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-            Candidate Requirements
-          </h3>
-          <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
-            {job.requirements.map((req, idx) => (
-              <li key={idx} className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary-600 mt-1.5 shrink-0" />
-                <span>{req}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Required Skills */}
-        <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-            Required Skills
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {job.skillsRequired.map((skill, idx) => (
-              <span
-                key={idx}
-                className="px-3 py-1 rounded-xl text-xs font-semibold bg-primary-50 dark:bg-primary-950 text-primary-600 dark:text-primary-300 border border-primary-200 dark:border-primary-800"
-              >
-                {skill}
-              </span>
-            ))}
+          {/* Bottom Action Buttons (Matching Mockup Screen 4) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <button
+              onClick={() => toggleSaveJob(job.id)}
+              className="py-3.5 px-6 rounded-2xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-extrabold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              {isSaved ? 'Saved to Bookmarks' : 'Save Job'}
+            </button>
+            <button
+              onClick={() => setIsApplyOpen(true)}
+              className="py-3.5 px-6 rounded-2xl bg-[#5B46E5] hover:bg-indigo-700 text-white text-xs font-black shadow-lg shadow-indigo-500/25 transition-all cursor-pointer"
+            >
+              Apply Now
+            </button>
           </div>
+
         </div>
 
-      </div>
+        {/* Apply Modal */}
+        <ApplyModal
+          job={job}
+          isOpen={isApplyOpen}
+          onClose={() => setIsApplyOpen(false)}
+        />
 
-      {/* Apply Modal */}
-      <ApplyModal
-        job={job}
-        isOpen={isApplyOpen}
-        onClose={() => setIsApplyOpen(false)}
-      />
-
+      </main>
     </div>
   );
 }

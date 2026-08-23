@@ -1,51 +1,29 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Sidebar } from '@/components/layout/Sidebar';
 import { useJobStore } from '@/store/useJobStore';
-import { JobCard } from '@/components/jobs/JobCard';
-import { JobFilter } from '@/components/jobs/JobFilter';
-import { ApplyModal } from '@/components/jobs/ApplyModal';
 import { Job } from '@/types';
-import { Briefcase, Sparkles, AlertCircle } from 'lucide-react';
+import { ApplyModal } from '@/components/jobs/ApplyModal';
+import { Search, Filter, Bookmark, MapPin, Clock, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export default function JobsPage() {
-  const { jobs, filters } = useJobStore();
+  const { jobs, savedJobIds, toggleSaveJob } = useJobStore();
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isApplyOpen, setIsApplyOpen] = useState(false);
 
-  // Apply filters
-  const filteredJobs = jobs.filter((j) => {
-    // Search Query
-    if (filters.searchQuery) {
-      const q = filters.searchQuery.toLowerCase();
-      const matchTitle = j.title.toLowerCase().includes(q);
-      const matchComp = j.companyName.toLowerCase().includes(q);
-      const matchSkills = j.skillsRequired.some((s) => s.toLowerCase().includes(q));
-      if (!matchTitle && !matchComp && !matchSkills) return false;
-    }
+  const filteredJobs = jobs.filter(
+    (j) =>
+      j.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      j.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      j.skillsRequired.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
-    // Department
-    if (filters.department !== 'All Departments' && j.department !== filters.department) {
-      return false;
-    }
-
-    // Work Type
-    if (filters.workType !== 'All Types' && j.workType !== filters.workType) {
-      return false;
-    }
-
-    // Min Salary
-    if (filters.minSalary > 0 && j.hourlyRate < filters.minSalary) {
-      return false;
-    }
-
-    // Status
-    if (filters.status !== 'ALL' && j.status !== filters.status) {
-      return false;
-    }
-
-    return true;
-  });
+  const getCompanyInitials = (name: string) => {
+    return name.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase();
+  };
 
   const handleApplyClick = (job: Job) => {
     setSelectedJob(job);
@@ -53,64 +31,125 @@ export default function JobsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex gap-8">
+      <Sidebar />
 
-      {/* Page Header Banner */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-primary-900 via-slate-900 to-secondary-950 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-primary-300 uppercase tracking-wider">
-            <Briefcase className="w-4 h-4" /> Student Job Marketplace
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight mt-1">
-            Discover Verified Campus Jobs
+      <main className="flex-1 space-y-6 min-w-0">
+
+        {/* Search Header & Filter Bar (Matching Mockup Screen 3) */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-glass space-y-4">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white">
+            Find Jobs
           </h1>
-          <p className="text-xs text-slate-300 mt-1 max-w-xl">
-            Real-time part-time postings with automated hiring quotas and instant AI profile matching.
-          </p>
-        </div>
-        <div className="px-4 py-2 rounded-2xl bg-white/10 border border-white/15 text-xs font-bold backdrop-blur-md">
-          {filteredJobs.length} Jobs Available
-        </div>
-      </div>
 
-      {/* Main Filter & Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+          {/* Search Bar Input */}
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-4 top-3.5 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by job title, skills or company..."
+              className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B46E5]"
+            />
+          </div>
 
-        {/* Sidebar Filters */}
-        <div className="lg:col-span-1">
-          <JobFilter />
-        </div>
-
-        {/* Jobs Grid */}
-        <div className="lg:col-span-3 space-y-4">
-          {filteredJobs.length === 0 ? (
-            <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-3">
-              <AlertCircle className="w-10 h-10 text-slate-400 mx-auto" />
-              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">
-                No matching jobs found
-              </h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Try adjusting your search keywords, salary slider, or schedule filters.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {filteredJobs.map((job) => (
-                <JobCard key={job.id} job={job} onApplyClick={handleApplyClick} />
-              ))}
-            </div>
-          )}
+          {/* Filter Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+            <span className="font-bold text-slate-400 text-[11px] uppercase tracking-wider flex items-center gap-1 shrink-0">
+              <Filter className="w-3.5 h-3.5" /> Filters:
+            </span>
+            {['Category ▾', 'Location ▾', 'Salary ▾', 'Skills ▾'].map((f) => (
+              <button
+                key={f}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 transition-colors shrink-0"
+              >
+                {f}
+              </button>
+            ))}
+          </div>
         </div>
 
-      </div>
+        {/* Job Cards List (Matching Mockup Screen 3) */}
+        <div className="space-y-4">
+          {filteredJobs.map((job, idx) => {
+            const isSaved = savedJobIds.includes(job.id);
+            const matchScores = [92, 90, 89, 85, 95, 88];
+            const score = matchScores[idx % matchScores.length];
 
-      {/* Apply Modal */}
-      <ApplyModal
-        job={selectedJob}
-        isOpen={isApplyOpen}
-        onClose={() => setIsApplyOpen(false)}
-      />
+            return (
+              <div
+                key={job.id}
+                className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-glass space-y-4 hover:shadow-lg transition-all"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    {/* Logo Box */}
+                    <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-md">
+                      {getCompanyInitials(job.companyName)}
+                    </div>
+                    <div className="space-y-1">
+                      <Link href={`/jobs/${job.id}`} className="hover:underline">
+                        <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                          {job.title}
+                        </h3>
+                      </Link>
+                      <div className="text-xs text-slate-500 font-medium">
+                        {job.companyName}
+                      </div>
+                      <div className="flex items-center gap-4 text-xs font-semibold text-slate-600 dark:text-slate-400 pt-1">
+                        <span>{job.location}</span>
+                        <span>•</span>
+                        <span className="font-extrabold text-slate-900 dark:text-white">₹{job.hourlyRate} / day</span>
+                        <span>•</span>
+                        <span>5 PM – 9 PM (Mon – Fri)</span>
+                      </div>
+                    </div>
+                  </div>
 
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="px-3.5 py-1 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-600 border border-emerald-200">
+                      {score}% Match
+                    </span>
+                    <button
+                      onClick={() => toggleSaveJob(job.id)}
+                      className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 transition-colors"
+                    >
+                      <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-[#5B46E5] text-[#5B46E5]' : 'text-slate-400'}`} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Skills Chips */}
+                <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  {job.skillsRequired.map((skill) => (
+                    <span
+                      key={skill}
+                      className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                  <button
+                    onClick={() => handleApplyClick(job)}
+                    className="ml-auto px-5 py-2 rounded-2xl bg-[#5B46E5] hover:bg-indigo-700 text-white text-xs font-extrabold shadow-md transition-all cursor-pointer"
+                  >
+                    Apply Now
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Apply Modal */}
+        <ApplyModal
+          job={selectedJob}
+          isOpen={isApplyOpen}
+          onClose={() => setIsApplyOpen(false)}
+        />
+
+      </main>
     </div>
   );
 }

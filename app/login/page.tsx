@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { UserRole } from '@/types';
 import {
-  Sparkles,
+  GraduationCap,
   Mail,
   Lock,
   User,
@@ -16,11 +16,9 @@ import {
   CheckCircle2,
   Eye,
   EyeOff,
-  Zap,
-  Smartphone
+  Sparkles
 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
-import { InteractiveMascot } from '@/components/ui/InteractiveMascot';
 import { motion } from 'framer-motion';
 
 export default function LoginPage() {
@@ -30,36 +28,19 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [selectedRole, setSelectedRole] = useState<UserRole>('student');
   const [error, setError] = useState('');
   const [forgotModalOpen, setForgotModalOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
 
-  // Field focus tracking for Mascot animations
-  const [isEmailFocused, setIsEmailFocused] = useState(false);
-  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
-
-  // Mouse Tracking for Parallax Background
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0, normalizedX: 0, normalizedY: 0 });
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const normalizedX = (x / rect.width - 0.5) * 2;
-    const normalizedY = (y / rect.height - 0.5) * 2;
-    setMousePos({ x, y, normalizedX, normalizedY });
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (!email.trim()) {
-      setError('Please enter your email address.');
+      setError('Please enter your email or phone.');
       return;
     }
 
@@ -68,7 +49,7 @@ export default function LoginPage() {
       if (selectedRole === 'employer') router.push('/employer/dashboard');
       else router.push('/student/dashboard');
     } else {
-      setError('Invalid credentials. Please check your details.');
+      setError('Invalid credentials. Please check your email and password.');
     }
   };
 
@@ -82,68 +63,63 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      className="relative min-h-[85vh] flex items-center justify-center py-6 px-3 sm:py-12 sm:px-6 overflow-hidden select-none"
-    >
-      {/* 1. AMBIENT GLOWING BACKGROUND ORBS (PARALLAX EFFECT) */}
-      <motion.div
-        animate={{
-          x: mousePos.normalizedX * 35,
-          y: mousePos.normalizedY * 35,
-        }}
-        transition={{ type: 'spring', stiffness: 75, damping: 25 }}
-        className="absolute top-10 left-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-primary-600/25 rounded-full blur-[100px] pointer-events-none"
-      />
-      <motion.div
-        animate={{
-          x: mousePos.normalizedX * -45,
-          y: mousePos.normalizedY * -45,
-        }}
-        transition={{ type: 'spring', stiffness: 60, damping: 20 }}
-        className="absolute bottom-10 right-1/4 w-72 sm:w-96 h-72 sm:h-96 bg-secondary-500/25 rounded-full blur-[100px] pointer-events-none"
-      />
+    <div className="min-h-[85vh] flex items-center justify-center py-6 px-3 sm:px-6">
+      <div className="max-w-4xl w-full bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
 
-      {/* Cursor Spotlight Effect */}
-      <div
-        className="hidden md:block absolute w-80 h-80 bg-primary-400/15 rounded-full blur-3xl pointer-events-none transition-opacity duration-300"
-        style={{
-          left: `${mousePos.x - 160}px`,
-          top: `${mousePos.y - 160}px`,
-        }}
-      />
-
-      {/* 2. MAIN MOBILE-OPTIMIZED LOGIN CARD */}
-      <motion.div
-        style={{
-          transform: `perspective(1000px) rotateX(${mousePos.normalizedY * -3}deg) rotateY(${mousePos.normalizedX * 3}deg)`,
-        }}
-        transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-        className="relative z-10 max-w-md w-full"
-      >
-        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl border border-slate-200/90 dark:border-slate-800/90 p-5 sm:p-8 shadow-2xl space-y-5">
-
-          {/* Interactive Mascot Cartoon Character */}
-          <div className="pt-1">
-            <InteractiveMascot
-              isEmailFocused={isEmailFocused}
-              isPasswordFocused={isPasswordFocused}
-              isPasswordVisible={showPassword}
-            />
-          </div>
-
-          {/* Brand Header */}
-          <div className="text-center space-y-1">
-            <h2 className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-slate-900 via-primary-950 to-slate-900 dark:from-white dark:via-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
-              Welcome to CampusFlex
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Smart Jobs. Flexible Future. Sign in to your portal.
+        {/* LEFT COLUMN: 3D STUDENT ILLUSTRATION & BRAND BANNER (MATCHING MOCKUP SCREEN 1) */}
+        <div className="relative bg-gradient-to-br from-indigo-50 via-purple-50 to-slate-100 dark:from-slate-800 dark:to-indigo-950 p-8 flex flex-col justify-between overflow-hidden border-b md:border-b-0 md:border-r border-slate-200/60 dark:border-slate-800">
+          {/* Top Brand Logo */}
+          <div className="relative z-10 space-y-1">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-2xl bg-[#5B46E5] flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                <GraduationCap className="w-6 h-6" />
+              </div>
+              <span className="text-2xl font-black text-slate-900 dark:text-white">
+                CampusFlex
+              </span>
+            </Link>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 pl-1">
+              Smart Jobs. Flexible Future.
             </p>
           </div>
 
-          {/* Error Alert Banner */}
+          {/* Center 3D Student Character Banner Illustration */}
+          <div className="relative my-8 flex items-center justify-center">
+            <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-3xl overflow-hidden shadow-2xl ring-4 ring-white/60 dark:ring-slate-800">
+              <img
+                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&auto=format&fit=crop&q=80"
+                alt="Campus Students Illustration"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-indigo-950/60 via-transparent to-transparent flex items-end p-4">
+                <p className="text-white text-xs font-extrabold drop-shadow-md">
+                  Join 10,000+ university students finding flexible part-time jobs today!
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Badge */}
+          <div className="relative z-10 flex items-center gap-2 text-[11px] font-bold text-indigo-600 dark:text-indigo-300">
+            <Sparkles className="w-4 h-4 text-amber-500" />
+            <span>AI Match & Guaranteed Hourly Shift Payouts</span>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: SLEEK LOGIN FORM (MATCHING MOCKUP SCREEN 1) */}
+        <div className="p-8 sm:p-10 flex flex-col justify-center space-y-6">
+
+          {/* Welcome Header */}
+          <div className="text-center space-y-1">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+              Welcome Back!
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+              Login to continue
+            </p>
+          </div>
+
+          {/* Error Alert */}
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -155,121 +131,114 @@ export default function LoginPage() {
             </motion.div>
           )}
 
-          {/* Login Form */}
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
 
-            {/* Role Selection Tabs (Big Touch-Friendly Targets) */}
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                <span>Account Role</span>
-                <span className="text-[10px] text-slate-400 font-normal">Student / Employer</span>
-              </label>
-              <div className="grid grid-cols-2 gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
-                <button
-                  type="button"
-                  onClick={() => setSelectedRole('student')}
-                  className={`min-h-[44px] text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                    selectedRole === 'student'
-                      ? 'bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 shadow-md'
-                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-                  }`}
-                >
-                  <User className="w-4 h-4" /> Student
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedRole('employer')}
-                  className={`min-h-[44px] text-xs font-extrabold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                    selectedRole === 'employer'
-                      ? 'bg-white dark:bg-slate-900 text-secondary-600 dark:text-secondary-400 shadow-md'
-                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-                  }`}
-                >
-                  <Building2 className="w-4 h-4" /> Employer
-                </button>
-              </div>
+            {/* Role Switcher Tabs (Student / Employer) */}
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl">
+              <button
+                type="button"
+                onClick={() => setSelectedRole('student')}
+                className={`py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+                  selectedRole === 'student'
+                    ? 'bg-[#5B46E5] text-white shadow-md'
+                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                Student
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedRole('employer')}
+                className={`py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+                  selectedRole === 'employer'
+                    ? 'bg-[#5B46E5] text-white shadow-md'
+                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                Employer
+              </button>
             </div>
 
-            {/* Email Input */}
+            {/* Email or Phone Input */}
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Email Address
-              </label>
               <div className="relative group">
-                <Mail className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-primary-600 transition-colors" />
+                <Mail className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-[#5B46E5] transition-colors" />
                 <input
-                  type="email"
+                  type="text"
                   required
                   value={email}
-                  onFocus={() => setIsEmailFocused(true)}
-                  onBlur={() => setIsEmailFocused(false)}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder={selectedRole === 'student' ? 'alex.rivera@university.edu' : 'hiring@company.com'}
-                  className="w-full pl-10 pr-4 py-3 min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-base sm:text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                  placeholder="Email or Phone"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B46E5] transition-all"
                 />
               </div>
             </div>
 
-            {/* Password Input with Show/Hide Toggle */}
+            {/* Password Input with Eye Icon */}
             <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Password
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setForgotModalOpen(true)}
-                  className="text-[11px] text-primary-600 dark:text-primary-400 hover:underline font-semibold"
-                >
-                  Forgot Password?
-                </button>
-              </div>
               <div className="relative group">
-                <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-primary-600 transition-colors" />
+                <Lock className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400 group-focus-within:text-[#5B46E5] transition-colors" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
-                  onFocus={() => setIsPasswordFocused(true)}
-                  onBlur={() => setIsPasswordFocused(false)}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-11 py-3 min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl text-base sm:text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
+                  placeholder="Password"
+                  className="w-full pl-10 pr-11 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B46E5] transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            {/* Large Touch Submit Button */}
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
+            {/* Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between text-xs pt-1">
+              <label className="flex items-center gap-2 font-medium text-slate-600 dark:text-slate-400 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded text-[#5B46E5] focus:ring-[#5B46E5]"
+                />
+                <span>Remember me</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setForgotModalOpen(true)}
+                className="font-bold text-[#5B46E5] hover:underline"
+              >
+                Forgot Password?
+              </button>
+            </div>
+
+            {/* Solid Purple Login Button */}
+            <button
               type="submit"
-              className="w-full min-h-[48px] py-3.5 text-xs sm:text-sm font-black text-white bg-gradient-to-r from-primary-600 via-primary-500 to-secondary-500 rounded-2xl shadow-lg shadow-primary-500/25 hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3.5 text-xs font-black text-white bg-[#5B46E5] hover:bg-indigo-700 rounded-2xl shadow-lg shadow-indigo-500/25 transition-all cursor-pointer mt-2"
             >
-              <span>Sign In to {selectedRole.toUpperCase()} Portal</span>
-              <ArrowRight className="w-4 h-4" />
-            </motion.button>
+              Login
+            </button>
           </form>
 
-          {/* Register Link */}
-          <div className="text-center text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
+          {/* Footer Register Link */}
+          <div className="text-center text-xs text-slate-500 dark:text-slate-400 pt-2">
             Don't have an account?{' '}
-            <Link href="/register" className="font-extrabold text-primary-600 dark:text-primary-400 hover:underline">
-              Create Free Account
+            <Link href="/register" className="font-extrabold text-[#5B46E5] hover:underline">
+              Register Now
             </Link>
           </div>
 
         </div>
-      </motion.div>
 
-      {/* Password Reset Modal */}
+      </div>
+
+      {/* Forgot Password Modal */}
       <Modal
         isOpen={forgotModalOpen}
         onClose={() => setForgotModalOpen(false)}
@@ -284,7 +253,7 @@ export default function LoginPage() {
         ) : (
           <form onSubmit={handleForgotSubmit} className="space-y-4">
             <p className="text-xs text-slate-500 leading-relaxed">
-              Enter your registered university or company email address and we'll send you a password recovery link.
+              Enter your registered email address and we'll send you a password recovery link.
             </p>
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -296,12 +265,12 @@ export default function LoginPage() {
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
                 placeholder="name@university.edu"
-                className="w-full px-3.5 py-3 min-h-[48px] bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base sm:text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3.5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B46E5]"
               />
             </div>
             <button
               type="submit"
-              className="w-full py-3 min-h-[48px] text-xs font-bold text-white bg-primary-600 rounded-xl shadow-md hover:bg-primary-700 transition-colors"
+              className="w-full py-3 text-xs font-bold text-white bg-[#5B46E5] rounded-xl shadow-md hover:bg-indigo-700 transition-colors"
             >
               Send Reset Password Link
             </button>

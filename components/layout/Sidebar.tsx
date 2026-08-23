@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import {
   LayoutDashboard,
@@ -16,15 +16,17 @@ import {
   Users,
   MessageSquare,
   Building2,
-  ShieldCheck,
-  BarChart3,
-  QrCode,
-  Sparkles
+  Calendar,
+  Star,
+  LogOut,
+  Sparkles,
+  GraduationCap
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
-  const { currentUser } = useAuthStore();
+  const router = useRouter();
+  const { currentUser, logout } = useAuthStore();
 
   if (!currentUser) return null;
 
@@ -32,50 +34,77 @@ export const Sidebar: React.FC = () => {
 
   const studentLinks = [
     { label: 'Dashboard', href: '/student/dashboard', icon: LayoutDashboard },
+    { label: 'Profile', href: '/student/profile', icon: User },
+    { label: 'My Timetable', href: '/student/saved', icon: Calendar },
     { label: 'Find Jobs', href: '/jobs', icon: Briefcase },
-    { label: 'My Applications', href: '/student/applications', icon: Clock },
-    { label: 'Digital Work ID', href: '/student/profile', icon: QrCode },
-    { label: 'Saved Jobs', href: '/student/saved', icon: Bookmark },
-    { label: 'Earnings & Payouts', href: '/student/earnings', icon: DollarSign },
+    { label: 'Applied Jobs', href: '/student/applications', icon: Clock },
+    { label: 'Earnings', href: '/student/earnings', icon: DollarSign },
+    { label: 'Ratings', href: '/student/profile', icon: Star },
     { label: 'Settings', href: '/student/settings', icon: Settings },
   ];
 
   const employerLinks = [
     { label: 'Dashboard', href: '/employer/dashboard', icon: LayoutDashboard },
-    { label: 'Post New Job', href: '/employer/post-job', icon: PlusCircle },
-    { label: 'Applicants Hub', href: '/employer/applicants', icon: Users },
-    { label: 'My Job Postings', href: '/employer/jobs', icon: Briefcase },
-    { label: 'Student Messages', href: '/employer/messages', icon: MessageSquare },
-    { label: 'Company Profile', href: '/employer/profile', icon: Building2 },
+    { label: 'Post Job', href: '/employer/post-job', icon: PlusCircle },
+    { label: 'My Jobs', href: '/employer/jobs', icon: Briefcase },
+    { label: 'Applicants', href: '/employer/applicants', icon: Users },
+    { label: 'Messages', href: '/employer/messages', icon: MessageSquare },
+    { label: 'Profile', href: '/employer/profile', icon: Building2 },
+    { label: 'Settings', href: '/student/settings', icon: Settings },
   ];
 
   const links = role === 'employer' ? employerLinks : studentLinks;
 
-  return (
-    <aside className="w-64 shrink-0 hidden md:block">
-      <div className="sticky top-20 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-4 shadow-glass">
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
 
-        {/* User Card Header */}
-        <div className="p-3 mb-4 rounded-2xl bg-gradient-to-br from-slate-50 to-primary-50/30 dark:from-slate-800/60 dark:to-primary-950/20 border border-slate-100 dark:border-slate-800">
+  return (
+    <aside className="w-64 shrink-0 hidden md:block select-none">
+      <div className="sticky top-20 bg-[#1E1B4B] text-white rounded-3xl p-5 shadow-2xl space-y-6 border border-indigo-900/50">
+
+        {/* Brand Header */}
+        <Link href="/" className="flex items-center gap-2 px-2">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-400 flex items-center justify-center text-white shadow-md">
+            <GraduationCap className="w-5 h-5" />
+          </div>
+          <span className="text-xl font-black tracking-tight text-white">
+            CampusFlex
+          </span>
+        </Link>
+
+        {/* Student Avatar Card & Profile Completion Bar (Matching Mockup) */}
+        <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 space-y-3">
           <div className="flex items-center gap-3">
             <img
-              src={currentUser.avatar || currentUser.companyLogo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'}
+              src={currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'}
               alt={currentUser.name}
-              className="w-10 h-10 rounded-xl object-cover ring-2 ring-primary-500/20"
+              className="w-12 h-12 rounded-full object-cover ring-2 ring-indigo-400/40 shrink-0"
             />
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
-                {currentUser.name}
-              </div>
-              <div className="text-xs text-primary-600 dark:text-primary-400 capitalize font-medium flex items-center gap-1">
-                {currentUser.verified && <ShieldCheck className="w-3 h-3 text-emerald-500 inline" />}
-                {currentUser.role} Account
-              </div>
+            <div className="min-w-0 flex-1">
+              <h4 className="text-sm font-black text-white truncate">
+                {currentUser.name || 'Ananya Nair'}
+              </h4>
+              <p className="text-[11px] text-indigo-200 truncate">
+                {currentUser.department || 'Computer Science'} • {currentUser.year || 'Semester 4'}
+              </p>
+            </div>
+          </div>
+
+          {/* Profile Completion Bar (80%) */}
+          <div className="space-y-1 pt-1 border-t border-white/10">
+            <div className="flex items-center justify-between text-[10px] font-bold text-indigo-200">
+              <span>Profile Completion</span>
+              <span className="text-indigo-300">80%</span>
+            </div>
+            <div className="w-full h-1.5 bg-indigo-950/80 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full w-[80%]" />
             </div>
           </div>
         </div>
 
-        {/* Navigation List */}
+        {/* Navigation Links (Matching Mockup Sidebar) */}
         <nav className="space-y-1">
           {links.map((link) => {
             const Icon = link.icon;
@@ -84,29 +113,27 @@ export const Sidebar: React.FC = () => {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all duration-200 ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 ${
                   isActive
-                    ? 'bg-gradient-to-r from-primary-600 to-secondary-500 text-white shadow-md shadow-primary-500/20'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100'
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                    : 'text-indigo-200 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-indigo-300'}`} />
                 <span>{link.label}</span>
               </Link>
             );
           })}
-        </nav>
 
-        {/* AI Assistant Banner Box */}
-        <div className="mt-6 p-3.5 rounded-2xl bg-gradient-to-br from-primary-600 to-secondary-600 text-white shadow-lg">
-          <div className="flex items-center gap-2 text-xs font-bold mb-1">
-            <Sparkles className="w-4 h-4 animate-spin text-amber-300" />
-            CampusFlex AI Active
-          </div>
-          <p className="text-[11px] opacity-90 leading-relaxed">
-            Automated slot monitoring and job recommendations are enabled.
-          </p>
-        </div>
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold text-indigo-200 hover:bg-rose-500/20 hover:text-rose-300 transition-all duration-200 cursor-pointer pt-2"
+          >
+            <LogOut className="w-4 h-4 text-rose-400" />
+            <span>Logout</span>
+          </button>
+        </nav>
 
       </div>
     </aside>
