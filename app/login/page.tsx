@@ -72,12 +72,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleQuickFillDemo = (demoEmail: string, role: UserRole) => {
-    setEmail(demoEmail);
-    setPassword('password123');
-    setSelectedRole(role);
-  };
-
   const handleForgotSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setForgotSent(true);
@@ -248,29 +242,6 @@ export default function LoginPage() {
                   className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* One-Touch Quick Fill Helper Buttons (Touch Friendly) */}
-            <div className="p-2.5 rounded-2xl bg-slate-100/70 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700/40 space-y-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block text-center">
-                ⚡ Quick Fill Test Credentials:
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickFillDemo('alex.rivera@university.edu', 'student')}
-                  className="py-1.5 px-2 rounded-xl bg-primary-600/10 hover:bg-primary-600/20 text-primary-700 dark:text-primary-300 text-[11px] font-bold text-center border border-primary-500/20 transition-colors cursor-pointer"
-                >
-                  Student Demo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickFillDemo('hiring@techcorp.com', 'employer')}
-                  className="py-1.5 px-2 rounded-xl bg-secondary-600/10 hover:bg-secondary-600/20 text-secondary-700 dark:text-secondary-300 text-[11px] font-bold text-center border border-secondary-500/20 transition-colors cursor-pointer"
-                >
-                  Employer Demo
                 </button>
               </div>
             </div>
