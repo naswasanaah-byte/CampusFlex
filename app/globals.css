@@ -1,31 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
   body {
-    @apply bg-surface-light dark:bg-surface-dark text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-primary-500 selection:text-white transition-colors duration-200;
+    background: radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.07), transparent 35%),
+                radial-gradient(circle at 90% 90%, rgba(108, 62, 244, 0.05), transparent 35%),
+                #F8F9FC;
+    color: #17121F;
+    @apply font-sans antialiased selection:bg-primary-500 selection:text-white transition-colors duration-200;
+  }
+
+  .dark body {
+    background: radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.12), transparent 35%),
+                radial-gradient(circle at 90% 90%, rgba(108, 62, 244, 0.08), transparent 35%),
+                #0F0F14;
+    color: #F9FAFB;
   }
 }
 
 .shadow-glass {
-  box-shadow: 0 8px 32px 0 rgba(108, 62, 244, 0.06);
+  box-shadow: 0 8px 30px rgba(108, 62, 244, 0.06);
 }
 
 .dark .shadow-glass {
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
 }
 
-/* Glassmorphism utility */
+/* Premium Card Hover Lift */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(108, 62, 244, 0.12);
+}
+
+.dark .hover-lift:hover {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+}
+
+/* Glassmorphism Card Utility */
 .glass-card {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .dark .glass-card {
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(24, 24, 31, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
