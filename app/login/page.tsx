@@ -13,7 +13,8 @@ import {
   EyeOff,
   Sparkles,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Info
 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { InteractiveMascot } from '@/components/ui/InteractiveMascot';
@@ -56,16 +57,21 @@ export default function LoginPage() {
     setError('');
 
     if (!email.trim()) {
-      setError('Please enter your email address.');
+      setError('Please enter your registered email address.');
       return;
     }
 
-    const success = login(email, selectedRole);
-    if (success) {
+    if (!password) {
+      setError('Please enter your password.');
+      return;
+    }
+
+    const res = login(email, password, selectedRole);
+    if (res.success) {
       if (selectedRole === 'employer') router.push('/employer/dashboard');
       else router.push('/student/dashboard');
     } else {
-      setError('Invalid credentials. Please check your email and password.');
+      setError(res.message || 'Invalid email or password. Please check your credentials.');
     }
   };
 
@@ -263,6 +269,17 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+              </div>
+
+              {/* Helpful Guidance Notice */}
+              <div className="p-3 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/60 text-xs text-indigo-900 dark:text-indigo-200 space-y-1">
+                <div className="font-bold flex items-center gap-1.5 text-indigo-700 dark:text-indigo-300 text-[11px]">
+                  <Info className="w-3.5 h-3.5 shrink-0 text-[#5B46E5]" />
+                  <span>First time on CampusFlex?</span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-indigo-800/90 dark:text-indigo-300/90">
+                  Enter your registered email & password, or click <strong>Register Now</strong> below to create your student or employer account.
+                </p>
               </div>
 
               {/* Remember Me & Forgot Password */}

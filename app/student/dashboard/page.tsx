@@ -57,6 +57,30 @@ export default function StudentDashboard() {
           </div>
         </div>
 
+        {/* 3-Step Simple Quick Start Guide for New Users */}
+        <div className="p-5 rounded-3xl bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 text-white shadow-xl space-y-3 border border-indigo-700/40">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" /> How CampusFlex Works
+            </span>
+            <span className="text-[10px] bg-indigo-500/20 text-indigo-200 px-2.5 py-0.5 rounded-full font-bold">3 Easy Steps</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 space-y-1">
+              <div className="text-xs font-black text-indigo-300">1. Setup Profile</div>
+              <p className="text-[11px] text-slate-300 leading-snug">Set skills in Profile to calculate real AI match scores for jobs.</p>
+            </div>
+            <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 space-y-1">
+              <div className="text-xs font-black text-indigo-300">2. Find Part-Time Jobs</div>
+              <p className="text-[11px] text-slate-300 leading-snug">Explore verified local & campus jobs matching your schedule.</p>
+            </div>
+            <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 space-y-1">
+              <div className="text-xs font-black text-indigo-300">3. Apply & Earn</div>
+              <p className="text-[11px] text-slate-300 leading-snug">Submit applications in 1-click & track verified shift payouts.</p>
+            </div>
+          </div>
+        </div>
+
         {/* 3 Dynamic Summary Stat Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-glass space-y-1">
