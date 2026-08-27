@@ -384,50 +384,32 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="space-y-2 pt-2">
-            {/* Account Option 1 */}
-            <button
-              onClick={() => handleGoogleSelect('ananya.nair.student@gmail.com', 'Ananya Nair (Google Student)', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80')}
-              className="w-full p-3 rounded-2xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-between text-left cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80"
-                  alt="Google Account"
-                  className="w-9 h-9 rounded-full object-cover ring-2 ring-primary-500/20"
-                />
-                <div>
-                  <div className="text-xs font-bold text-slate-900 dark:text-slate-100">Ananya Nair</div>
-                  <div className="text-[11px] text-slate-500">ananya.nair.student@gmail.com</div>
-                </div>
-              </div>
-              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Google Verified</span>
-            </button>
-
-            {/* Custom Google Email Input Option */}
-            <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
-              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">
-                Or enter another Google Email:
-              </span>
-              <div className="flex gap-2">
+          <div className="space-y-3 pt-2">
+            <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40 space-y-3">
+              <label className="text-xs font-extrabold text-slate-700 dark:text-slate-200 block">
+                Enter your Google Account Email:
+              </label>
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="email"
                   value={customGoogleEmail}
                   onChange={(e) => setCustomGoogleEmail(e.target.value)}
-                  placeholder="your.name@gmail.com"
-                  className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-slate-100"
+                  placeholder="your.email@gmail.com"
+                  className="flex-1 px-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B46E5]"
                 />
                 <button
                   onClick={() => {
-                    if (customGoogleEmail.trim()) {
-                      handleGoogleSelect(customGoogleEmail, customGoogleEmail.split('@')[0]);
-                    }
+                    const mail = customGoogleEmail.trim() || 'user.google@gmail.com';
+                    handleGoogleSelect(mail, mail.split('@')[0]);
                   }}
-                  className="px-4 py-2 bg-[#5B46E5] text-white text-xs font-bold rounded-xl shadow-md cursor-pointer"
+                  className="px-5 py-2.5 bg-[#5B46E5] hover:bg-indigo-700 text-white text-xs font-black rounded-xl shadow-md cursor-pointer transition-all shrink-0"
                 >
-                  Continue
+                  Continue with Google
                 </button>
               </div>
+              <p className="text-[11px] text-slate-500">
+                🔒 CampusFlex automatically authenticates your verified Google account profile.
+              </p>
             </div>
           </div>
         </div>

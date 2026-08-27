@@ -3,18 +3,18 @@ import { User, Job, Application, Notification, ChatMessage, EarningsRecord } fro
 export const MOCK_USERS: User[] = [
   {
     id: 'user-student-1',
-    name: 'Ananya Nair',
-    email: 'ananya.nair@university.edu',
+    name: 'Student User',
+    email: 'student@university.edu',
     role: 'student',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
     verified: true,
     phone: '+91 98765 43210',
-    bio: 'Computer Science Semester 4 student looking for flexible tutoring, design, and technical part-time jobs.',
+    bio: 'University student looking for flexible tutoring, design, and technical part-time jobs.',
     department: 'Computer Science',
     year: 'Semester 4',
     skills: ['Teaching', 'Mathematics', 'Science', 'Communication', 'Graphic Design', 'Data Entry'],
     gpa: 3.9,
-    resumeUrl: 'ananya_nair_resume.pdf',
+    resumeUrl: 'student_resume.pdf',
     location: 'Calicut, Kerala',
     rating: 4.9,
     status: 'active',
@@ -54,7 +54,7 @@ export const MOCK_JOBS: Job[] = [
       'Good communication skills',
       'Strong knowledge in Math & Science',
       'Ability to explain concepts clearly',
-      'Punctual and reliable'
+      'Punctual and reliable',
     ],
     skillsRequired: ['Teaching', 'Mathematics', 'Science', 'Communication'],
     requiredEmployees: 3,
@@ -80,7 +80,7 @@ export const MOCK_JOBS: Job[] = [
     requirements: [
       'Proficiency in MS Excel & Typing',
       'Attention to detail',
-      'Available 2 PM – 6 PM (Mon – Sat)'
+      'Available 2 PM – 6 PM (Mon – Sat)',
     ],
     skillsRequired: ['MS Excel', 'Typing', 'Data Entry', 'Organization'],
     requiredEmployees: 2,
@@ -106,7 +106,7 @@ export const MOCK_JOBS: Job[] = [
     requirements: [
       'Experience with Photoshop & Canva',
       'Creative portfolio',
-      'Shift: 6 PM – 8 PM (Mon – Fri)'
+      'Shift: 6 PM – 8 PM (Mon – Fri)',
     ],
     skillsRequired: ['Photoshop', 'Canva', 'Design', 'Creativity'],
     requiredEmployees: 2,
@@ -132,7 +132,7 @@ export const MOCK_JOBS: Job[] = [
     requirements: [
       'Strong social media copywriting',
       'Knowledge of content scheduling',
-      'Shift: 5 PM – 9 PM (Mon – Fri)'
+      'Shift: 5 PM – 9 PM (Mon – Fri)',
     ],
     skillsRequired: ['Social Media', 'Content', 'Marketing', 'Communication'],
     requiredEmployees: 3,
@@ -157,7 +157,7 @@ export const MOCK_JOBS: Job[] = [
     description: 'Assist students with book inventory checkouts, cataloging, and maintaining quiet study spaces.',
     requirements: [
       'Morning availability (9 AM – 1 PM)',
-      'Organized and polite manner'
+      'Organized and polite manner',
     ],
     skillsRequired: ['Organization', 'Communication', 'Customer Service'],
     requiredEmployees: 2,
@@ -182,7 +182,7 @@ export const MOCK_JOBS: Job[] = [
     description: 'Represent campus student initiatives, coordinate workshop registrations, and spread brand awareness.',
     requirements: [
       'Enthusiastic personality',
-      'Weekend availability (Sat, Sun)'
+      'Weekend availability (Sat, Sun)',
     ],
     skillsRequired: ['Event Planning', 'Public Speaking', 'Communication'],
     requiredEmployees: 4,
@@ -193,7 +193,7 @@ export const MOCK_JOBS: Job[] = [
     featured: true,
     viewsCount: 260,
     applicationsCount: 11,
-  }
+  },
 ];
 
 export const MOCK_APPLICATIONS: Application[] = [
@@ -201,9 +201,9 @@ export const MOCK_APPLICATIONS: Application[] = [
     id: 'app-001',
     jobId: 'job-101',
     studentId: 'user-student-1',
-    studentName: 'Ananya Nair',
+    studentName: 'Student User',
     studentAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
-    studentEmail: 'ananya.nair@university.edu',
+    studentEmail: 'student@university.edu',
     studentDepartment: 'Computer Science',
     jobTitle: 'Online Tutor',
     companyName: 'Bright Academy',
@@ -213,18 +213,18 @@ export const MOCK_APPLICATIONS: Application[] = [
     matchReasons: [
       'Matches Math & Science subject criteria',
       'Matches Computer Science department major',
-      'Matches Mon, Wed, Fri schedule availability'
+      'Matches Mon, Wed, Fri schedule availability',
     ],
     coverLetter: 'I am passionate about teaching Math & Science to high school students and have prior tutoring experience.',
-    availability: 'Mon, Wed, Fri (5 PM – 7 PM)'
+    availability: 'Mon, Wed, Fri (5 PM – 7 PM)',
   },
   {
     id: 'app-002',
     jobId: 'job-102',
     studentId: 'user-student-1',
-    studentName: 'Ananya Nair',
+    studentName: 'Student User',
     studentAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
-    studentEmail: 'ananya.nair@university.edu',
+    studentEmail: 'student@university.edu',
     studentDepartment: 'Computer Science',
     jobTitle: 'Data Entry Operator',
     companyName: 'InfoDesk',
@@ -233,99 +233,84 @@ export const MOCK_APPLICATIONS: Application[] = [
     matchPercentage: 90,
     matchReasons: [
       'High proficiency in MS Excel & Data Processing',
-      'Matches afternoon availability'
+      'Matches afternoon availability',
     ],
     coverLetter: 'Fast typing speed (65 WPM) and excellent attention to detail.',
-    availability: 'Mon – Sat (2 PM – 6 PM)'
+    availability: 'Mon – Sat (2 PM – 6 PM)',
   },
   {
     id: 'app-003',
     jobId: 'job-103',
     studentId: 'user-student-1',
-    studentName: 'Ananya Nair',
+    studentName: 'Student User',
     studentAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
-    studentEmail: 'ananya.nair@university.edu',
+    studentEmail: 'student@university.edu',
     studentDepartment: 'Computer Science',
     jobTitle: 'Graphic Designer',
     companyName: 'PixelMart',
     status: 'REJECTED',
     appliedAt: '15 May 2024',
     matchPercentage: 92,
-    matchReasons: [
-      'Strong Photoshop & Canva skills'
-    ],
+    matchReasons: ['Strong Photoshop & Canva skills'],
     coverLetter: 'Submitted sample design portfolio for review.',
-    availability: 'Mon – Fri (6 PM – 8 PM)'
+    availability: 'Mon – Fri (6 PM – 8 PM)',
   },
   {
     id: 'app-004',
     jobId: 'job-105',
     studentId: 'user-student-1',
-    studentName: 'Ananya Nair',
+    studentName: 'Student User',
     studentAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
-    studentEmail: 'ananya.nair@university.edu',
+    studentEmail: 'student@university.edu',
     studentDepartment: 'Computer Science',
     jobTitle: 'Library Assistant',
     companyName: 'Greenfield College',
     status: 'ACCEPTED',
     appliedAt: '10 May 2024',
     matchPercentage: 85,
-    matchReasons: [
-      'Strong organization & campus communication'
-    ],
+    matchReasons: ['Strong organization & campus communication'],
     coverLetter: 'Looking forward to supporting college library operations.',
-    availability: 'Mon – Sat (9 AM – 1 PM)'
-  }
+    availability: 'Mon – Sat (9 AM – 1 PM)',
+  },
 ];
 
 export const MOCK_NOTIFICATIONS: Notification[] = [
   {
-    id: 'notif-1',
+    id: 'notif-001',
     userId: 'user-student-1',
-    title: 'Application Update! 🎉',
+    title: 'Application Accepted! 🎉',
     message: 'InfoDesk accepted your application for Data Entry Operator.',
     type: 'application',
     read: false,
-    createdAt: '2026-08-18T14:00:00Z',
-    link: '/student/applications'
-  }
+    createdAt: '2026-08-18T10:00:00Z',
+    link: '/student/applications',
+  },
 ];
 
-export const MOCK_CHAT_MESSAGES: ChatMessage[] = [
-  {
-    id: 'msg-1',
-    conversationId: 'conv-ananya-bright',
-    senderId: 'user-employer-1',
-    receiverId: 'user-student-1',
-    senderName: 'Bright Academy',
-    senderRole: 'employer',
-    message: 'Hi Ananya! We reviewed your Online Tutor profile and match score. We are very impressed!',
-    timestamp: '2026-08-19T13:45:00Z',
-    read: true
-  }
-];
+export const MOCK_CHATS: ChatMessage[] = [];
+export const MOCK_CHAT_MESSAGES: ChatMessage[] = [];
 
 export const MOCK_EARNINGS: EarningsRecord[] = [
   {
-    id: 'earn-1',
+    id: 'earn-001',
     studentId: 'user-student-1',
-    jobTitle: 'Data Entry Operator Shift',
+    jobTitle: 'Data Entry Shift',
     companyName: 'InfoDesk',
     hoursWorked: 5,
     hourlyRate: 500,
     totalAmount: 2500,
-    date: '2026-08-18',
-    status: 'PAID'
+    status: 'PAID',
+    date: '18 Aug 2026',
   },
   {
-    id: 'earn-2',
+    id: 'earn-002',
     studentId: 'user-student-1',
-    jobTitle: 'Library Assistant Shift',
+    jobTitle: 'Library Support Shift',
     companyName: 'Greenfield College',
     hoursWorked: 4,
-    hourlyRate: 400,
+    hourlyRate: 437.5,
     totalAmount: 1750,
-    date: '2026-08-15',
-    status: 'PAID'
-  }
+    status: 'PAID',
+    date: '15 Aug 2026',
+  },
 ];
