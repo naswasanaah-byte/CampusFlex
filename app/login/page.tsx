@@ -82,11 +82,17 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleSelect = (gEmail: string, gName: string, avatarUrl?: string) => {
-    loginWithGoogle(gEmail, gName, avatarUrl, selectedRole);
-    setGoogleModalOpen(false);
-    if (selectedRole === 'employer') router.push('/employer/dashboard');
-    else router.push('/student/dashboard');
+  const handleGoogleSelect = async (gEmail: string, gName: string, avatarUrl?: string, tokenPayload?: string) => {
+    setError('');
+    const res = await loginWithGoogle(gEmail, gName, avatarUrl, selectedRole, tokenPayload);
+    if (res.success) {
+      setGoogleModalOpen(false);
+      if (selectedRole === 'employer') router.push('/employer/dashboard');
+      else router.push('/student/dashboard');
+    } else {
+      setError(res.message || 'Google authentication failed.');
+      setGoogleModalOpen(false);
+    }
   };
 
   const handleForgotSubmit = (e: React.FormEvent) => {

@@ -13,7 +13,13 @@ interface AuthState {
   isAuthenticated: boolean;
   switchRole: (role: UserRole) => void;
   login: (email: string, password?: string, role?: UserRole) => AuthLoginResponse;
-  loginWithGoogle: (email: string, name: string, avatar?: string, role?: UserRole) => boolean;
+  loginWithGoogle: (
+    email: string,
+    name: string,
+    avatar?: string,
+    role?: UserRole,
+    credentialToken?: string
+  ) => Promise<AuthLoginResponse>;
   logout: () => void;
   register: (user: Partial<User>) => void;
   updateProfile: (updatedData: Partial<User>) => void;
@@ -78,34 +84,71 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return { success: true };
   },
 
-  loginWithGoogle: (email: string, name: string, avatar?: string, role?: UserRole) => {
-    const cleanEmail = email.trim().toLowerCase();
-    const existing = get().usersList.find((u) => u.email.toLowerCase() === cleanEmail);
-    if (existing) {
-      set({ currentUser: existing, isAuthenticated: true });
-      return true;
+  loginWithGoogle: async (
+    email: string,
+    name: string,
+    avatar?: string,
+    role?: UserRole,
+    credentialToken?: string
+  ): Promise<AuthLoginResponse> => {
+    try {
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          credential: credentialToken,
+          email,
+          name,
+          avatar,
+          role: role || 'student',
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success && data.user) {
+        set((state) => {
+          const exists = state.usersList.some((u) => u.id === data.user.id);
+          const updatedList = exists
+            ? state.usersList.map((u) => (u.id === data.user.id ? data.user : u))
+            : [...state.usersList, data.user];
+          return {
+            usersList: updatedList,
+            currentUser: data.user,
+            isAuthenticated: true,
+          };
+        });
+        return { success: true, message: data.message };
+      }
+      return { success: false, message: data.error || 'Google authentication failed.' };
+    } catch (err: any) {
+      console.warn('Fallback to local state provision for Google login:', err);
+      const cleanEmail = email.trim().toLowerCase();
+      const existing = get().usersList.find((u) => u.email.toLowerCase() === cleanEmail);
+      if (existing) {
+        set({ currentUser: existing, isAuthenticated: true });
+        return { success: true };
+      }
+      const googleUser: User = {
+        id: `user-google-${Date.now()}`,
+        name: name || 'Google User',
+        email: cleanEmail,
+        authProvider: 'google',
+        role: role || 'student',
+        avatar: avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
+        verified: true,
+        department: 'Computer Science',
+        year: 'Semester 1',
+        skills: ['Problem Solving', 'Communication'],
+        status: 'active',
+        createdAt: new Date().toISOString(),
+      };
+      set((state) => ({
+        usersList: [...state.usersList, googleUser],
+        currentUser: googleUser,
+        isAuthenticated: true,
+      }));
+      return { success: true };
     }
-
-    const googleUser: User = {
-      id: `user-google-${Date.now()}`,
-      name: name || 'Google Student',
-      email: cleanEmail,
-      role: role || 'student',
-      avatar: avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
-      verified: true,
-      department: 'Computer Science',
-      year: 'Semester 4',
-      skills: ['Teaching', 'Communication', 'Mathematics'],
-      status: 'active',
-      createdAt: new Date().toISOString(),
-    };
-
-    set((state) => ({
-      usersList: [...state.usersList, googleUser],
-      currentUser: googleUser,
-      isAuthenticated: true,
-    }));
-    return true;
   },
 
   logout: () => {
@@ -118,6 +161,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       name: userData.name || 'New User',
       email: (userData.email || 'user@campus.edu').toLowerCase().trim(),
       password: userData.password || 'password123',
+      authProvider: 'credentials',
       role: userData.role || 'student',
       avatar: userData.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
       verified: userData.role === 'student',

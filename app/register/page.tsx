@@ -39,11 +39,15 @@ export default function RegisterPage() {
     else router.push('/student/dashboard');
   };
 
-  const handleGoogleSelect = (gEmail: string, gName: string, avatarUrl?: string) => {
-    loginWithGoogle(gEmail, gName, avatarUrl, role);
-    setGoogleModalOpen(false);
-    if (role === 'employer') router.push('/employer/dashboard');
-    else router.push('/student/dashboard');
+  const handleGoogleSelect = async (gEmail: string, gName: string, avatarUrl?: string, tokenPayload?: string) => {
+    const res = await loginWithGoogle(gEmail, gName, avatarUrl, role, tokenPayload);
+    if (res.success) {
+      setGoogleModalOpen(false);
+      if (role === 'employer') router.push('/employer/dashboard');
+      else router.push('/student/dashboard');
+    } else {
+      setGoogleModalOpen(false);
+    }
   };
 
   return (

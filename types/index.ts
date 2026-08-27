@@ -5,6 +5,8 @@ export interface User {
   name: string;
   email: string;
   password?: string;
+  googleId?: string;
+  authProvider?: 'credentials' | 'google';
   role: UserRole;
   avatar?: string;
   verified?: boolean;
