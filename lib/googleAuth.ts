@@ -9,8 +9,41 @@ export interface VerifiedGoogleUser {
 }
 
 /**
+ * Formats user's display name cleanly from Google OAuth claims or email,
+ * ensuring no "user.google", raw email prefixes, or machine identifiers are used.
+ */
+export function formatHumanName(name?: string, email?: string): string {
+  if (
+    name &&
+    name.trim() &&
+    !name.toLowerCase().includes('user.google') &&
+    !name.toLowerCase().includes('google user')
+  ) {
+    return name.trim();
+  }
+
+  if (email && email.includes('@')) {
+    const prefix = email.split('@')[0];
+    // Remove digits, dots, underscores, hyphens, and capitalize nicely (e.g. avanisl813 -> Avani)
+    const clean = prefix
+      .replace(/[0-9]/g, '')
+      .replace(/[\._-]/g, ' ')
+      .trim();
+
+    const words = clean.split(/\s+/).filter((w) => w.length > 0);
+    if (words.length > 0) {
+      return words
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+    }
+  }
+
+  return 'Student User';
+}
+
+/**
  * Validates Google OAuth 2.0 / OIDC ID Tokens securely.
- * Verifies issuer, expiration, and payload attributes.
+ * Verifies issuer, expiration, and payload attributes (name, picture, sub, email).
  */
 export async function verifyGoogleTokenPayload(
   credentialToken: string
@@ -39,10 +72,13 @@ export async function verifyGoogleTokenPayload(
         return null;
       }
 
+      const email = payload.email?.toLowerCase();
+      const displayName = formatHumanName(payload.name, email);
+
       return {
         googleId: payload.sub,
-        email: payload.email?.toLowerCase(),
-        name: payload.name || payload.email?.split('@')[0] || 'Google User',
+        email,
+        name: displayName,
         picture: payload.picture,
         emailVerified: payload.email_verified,
       };
@@ -51,10 +87,12 @@ export async function verifyGoogleTokenPayload(
     // Direct OIDC payload object validation fallback
     const parsed = typeof credentialToken === 'string' ? JSON.parse(credentialToken) : credentialToken;
     if (parsed.email && (parsed.sub || parsed.googleId)) {
+      const email = parsed.email.toLowerCase();
+      const displayName = formatHumanName(parsed.name, email);
       return {
         googleId: parsed.sub || parsed.googleId || `g-${Date.now()}`,
-        email: parsed.email.toLowerCase(),
-        name: parsed.name || parsed.email.split('@')[0],
+        email,
+        name: displayName,
         picture: parsed.picture || parsed.avatar,
         emailVerified: true,
       };

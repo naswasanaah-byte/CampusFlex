@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { RoleSwitcher } from '@/components/ui/RoleSwitcher';
 import { NotificationDropdown } from '@/components/ui/NotificationDropdown';
+import { formatHumanName } from '@/lib/googleAuth';
 import { Sparkles, Sun, Moon, Search, Menu, X, LogIn, UserCheck, ShieldCheck, LogOut, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -80,7 +81,7 @@ export const Navbar: React.FC = () => {
                   />
                   <div className="text-left hidden xl:block">
                     <div className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate max-w-[120px]">
-                      {currentUser.name}
+                      {formatHumanName(currentUser.name, currentUser.email)}
                     </div>
                     <div className="text-[10px] text-slate-500 dark:text-slate-400 capitalize font-medium">
                       {currentUser.role}

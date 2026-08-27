@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { MOCK_USERS } from '@/lib/mockData';
-import { verifyGoogleTokenPayload } from '@/lib/googleAuth';
+import { verifyGoogleTokenPayload, formatHumanName } from '@/lib/googleAuth';
 import { User, UserRole } from '@/types';
 
 export async function POST(request: Request) {
@@ -8,16 +8,17 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { credential, role = 'student', googleId, email, name, avatar } = body;
 
-    // 1. Verify Google OIDC Token securely
+    // 1. Verify Google OIDC Token securely & format display name
     let googlePayload = null;
     if (credential) {
       googlePayload = await verifyGoogleTokenPayload(credential);
     } else if (email && (googleId || name)) {
-      // Direct OAuth payload from verified front-end flow
+      const cleanEmail = email.toLowerCase().trim();
+      const displayName = formatHumanName(name, cleanEmail);
       googlePayload = {
         googleId: googleId || `google-uid-${Date.now()}`,
-        email: email.toLowerCase().trim(),
-        name: name || email.split('@')[0],
+        email: cleanEmail,
+        name: displayName,
         picture: avatar,
         emailVerified: true,
       };
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
     }
 
     const cleanEmail = googlePayload.email.toLowerCase().trim();
+    const displayName = formatHumanName(googlePayload.name, cleanEmail);
 
     // 2. Search existing user database by Google ID or Email
     let user = MOCK_USERS.find(
@@ -38,12 +40,15 @@ export async function POST(request: Request) {
     );
 
     if (user) {
-      // Account exists: link Google ID if missing and log user into existing account
+      // Account exists: update name if missing or user.google, link Google ID
+      if (!user.name || user.name.toLowerCase().includes('user.google')) {
+        user.name = displayName;
+      }
       if (!user.googleId) {
         user.googleId = googlePayload.googleId;
         user.authProvider = 'google';
       }
-      if (googlePayload.picture && !user.avatar) {
+      if (googlePayload.picture && (!user.avatar || user.avatar.includes('unsplash'))) {
         user.avatar = googlePayload.picture;
       }
 
@@ -60,7 +65,7 @@ export async function POST(request: Request) {
       id: `user-google-${Date.now()}`,
       googleId: googlePayload.googleId,
       authProvider: 'google',
-      name: googlePayload.name || cleanEmail.split('@')[0],
+      name: displayName,
       email: cleanEmail,
       role: (role as UserRole) || 'student',
       avatar:
@@ -74,7 +79,7 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    // Save to user store / mock database
+    // Save to user store / database
     MOCK_USERS.push(newGoogleUser);
 
     return NextResponse.json(

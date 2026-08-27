@@ -9,6 +9,7 @@ import { Job } from '@/types';
 import { ApplyModal } from '@/components/jobs/ApplyModal';
 import { MOCK_EARNINGS } from '@/lib/mockData';
 import { calculateAIMatch } from '@/lib/aiEngine';
+import { formatHumanName } from '@/lib/googleAuth';
 import { Sparkles, Calendar, Clock, ArrowRight, MapPin } from 'lucide-react';
 import Link from 'next/link';
 
@@ -49,7 +50,7 @@ export default function StudentDashboard() {
         <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-glass flex items-center justify-between">
           <div className="space-y-1">
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-              Hello, {currentUser?.name || 'Student'}! 👋
+              Hello, {formatHumanName(currentUser?.name, currentUser?.email)}! 👋
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
               Find the best part-time jobs that fit your schedule and skills.

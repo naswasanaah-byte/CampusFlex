@@ -22,6 +22,7 @@ import {
   Sparkles,
   GraduationCap
 } from 'lucide-react';
+import { formatHumanName } from '@/lib/googleAuth';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
@@ -87,7 +88,7 @@ export const Sidebar: React.FC = () => {
                 />
                 <div className="min-w-0 flex-1">
                   <h4 className="text-sm font-black text-white truncate">
-                    {currentUser.name}
+                    {formatHumanName(currentUser.name, currentUser.email)}
                   </h4>
                   <p className="text-[11px] text-indigo-200 truncate">
                     {currentUser.department || 'Student'} • {currentUser.year || 'Member'}

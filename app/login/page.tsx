@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { InteractiveMascot } from '@/components/ui/InteractiveMascot';
+import { formatHumanName } from '@/lib/googleAuth';
 import { motion } from 'framer-motion';
 
 export default function LoginPage() {
@@ -405,8 +406,9 @@ export default function LoginPage() {
                 />
                 <button
                   onClick={() => {
-                    const mail = customGoogleEmail.trim() || 'user.google@gmail.com';
-                    handleGoogleSelect(mail, mail.split('@')[0]);
+                    const mail = customGoogleEmail.trim() || 'student@gmail.com';
+                    const cleanName = formatHumanName(undefined, mail);
+                    handleGoogleSelect(mail, cleanName);
                   }}
                   className="px-5 py-2.5 bg-[#5B46E5] hover:bg-indigo-700 text-white text-xs font-black rounded-xl shadow-md cursor-pointer transition-all shrink-0"
                 >
