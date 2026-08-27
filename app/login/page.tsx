@@ -14,7 +14,10 @@ import {
   Sparkles,
   AlertCircle,
   CheckCircle2,
-  Info
+  Info,
+  Check,
+  UserCheck,
+  Building2
 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { InteractiveMascot } from '@/components/ui/InteractiveMascot';
@@ -22,7 +25,7 @@ import { motion } from 'framer-motion';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuthStore();
+  const { login, loginWithGoogle } = useAuthStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,6 +36,10 @@ export default function LoginPage() {
   const [forgotModalOpen, setForgotModalOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotSent, setForgotSent] = useState(false);
+
+  // Google OAuth Modal State
+  const [googleModalOpen, setGoogleModalOpen] = useState(false);
+  const [customGoogleEmail, setCustomGoogleEmail] = useState('');
 
   // Field focus tracking for Mascot animations
   const [isEmailFocused, setIsEmailFocused] = useState(false);
@@ -47,8 +54,8 @@ export default function LoginPage() {
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const normalizedX = (x / rect.width - 0.5) * 2; // -1 to 1
-    const normalizedY = (y / rect.height - 0.5) * 2; // -1 to 1
+    const normalizedX = (x / rect.width - 0.5) * 2;
+    const normalizedY = (y / rect.height - 0.5) * 2;
     setMousePos({ x, y, normalizedX, normalizedY });
   };
 
@@ -73,6 +80,13 @@ export default function LoginPage() {
     } else {
       setError(res.message || 'Invalid email or password. Please check your credentials.');
     }
+  };
+
+  const handleGoogleSelect = (gEmail: string, gName: string, avatarUrl?: string) => {
+    loginWithGoogle(gEmail, gName, avatarUrl, selectedRole);
+    setGoogleModalOpen(false);
+    if (selectedRole === 'employer') router.push('/employer/dashboard');
+    else router.push('/student/dashboard');
   };
 
   const handleForgotSubmit = (e: React.FormEvent) => {
@@ -117,7 +131,7 @@ export default function LoginPage() {
         }}
       />
 
-      {/* 3D LOGIN PAD CONTAINER - MOVES & TILTS IN DIRECTION OF MOUSE ARROW */}
+      {/* 3D LOGIN PAD CONTAINER */}
       <motion.div
         style={{
           transform: `perspective(1000px) rotateX(${mousePos.normalizedY * -5}deg) rotateY(${mousePos.normalizedX * 5}deg) translate3d(${mousePos.normalizedX * 12}px, ${mousePos.normalizedY * 12}px, 0px)`,
@@ -129,7 +143,6 @@ export default function LoginPage() {
 
           {/* LEFT COLUMN: BRAND BANNER & 3D STUDENT ILLUSTRATION */}
           <div className="relative bg-gradient-to-br from-indigo-50 via-purple-50 to-slate-100 dark:from-slate-800 dark:to-indigo-950 p-8 flex flex-col justify-between overflow-hidden border-b md:border-b-0 md:border-r border-slate-200/60 dark:border-slate-800">
-            {/* Top Brand Logo */}
             <div className="relative z-10 space-y-1">
               <Link href="/" className="flex items-center gap-2">
                 <div className="w-10 h-10 rounded-2xl bg-[#5B46E5] flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
@@ -144,7 +157,6 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {/* Center 3D Student Character Banner Illustration */}
             <div className="relative my-6 flex items-center justify-center">
               <div className="relative w-60 h-60 sm:w-64 sm:h-64 rounded-3xl overflow-hidden shadow-2xl ring-4 ring-white/60 dark:ring-slate-800">
                 <img
@@ -160,7 +172,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Bottom Badge */}
             <div className="relative z-10 flex items-center gap-2 text-[11px] font-bold text-indigo-600 dark:text-indigo-300">
               <Sparkles className="w-4 h-4 text-amber-500" />
               <span>AI Match & Guaranteed Hourly Shift Payouts</span>
@@ -189,7 +200,7 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {/* Error Alert */}
+            {/* Error Alert Banner */}
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -201,10 +212,33 @@ export default function LoginPage() {
               </motion.div>
             )}
 
+            {/* GOOGLE SIGN-IN BUTTON */}
+            <button
+              type="button"
+              onClick={() => setGoogleModalOpen(true)}
+              className="w-full py-3 min-h-[48px] px-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-750 transition-all flex items-center justify-center gap-3 cursor-pointer"
+            >
+              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+              </svg>
+              <span>Sign in with Google</span>
+            </button>
+
+            {/* Divider */}
+            <div className="relative flex items-center justify-center my-1">
+              <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
+              <span className="bg-white dark:bg-slate-900 px-3 text-[10px] uppercase font-bold text-slate-400 shrink-0">
+                OR email sign in
+              </span>
+            </div>
+
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-3.5">
 
-              {/* Role Switcher Tabs (Student / Employer) */}
+              {/* Role Switcher Tabs */}
               <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl">
                 <button
                   type="button"
@@ -241,7 +275,7 @@ export default function LoginPage() {
                     onFocus={() => setIsEmailFocused(true)}
                     onBlur={() => setIsEmailFocused(false)}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email or Phone"
+                    placeholder="Email Address"
                     className="w-full pl-10 pr-4 py-3 min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-base sm:text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B46E5] transition-all"
                   />
                 </div>
@@ -309,7 +343,7 @@ export default function LoginPage() {
                 type="submit"
                 className="w-full py-3.5 min-h-[48px] text-xs font-black text-white bg-[#5B46E5] hover:bg-indigo-700 rounded-2xl shadow-lg shadow-indigo-500/25 transition-all cursor-pointer"
               >
-                Login
+                Login to {selectedRole.toUpperCase()} Portal
               </motion.button>
             </form>
 
@@ -325,6 +359,79 @@ export default function LoginPage() {
 
         </div>
       </motion.div>
+
+      {/* GOOGLE SIGN-IN INTERACTIVE OAUTH MODAL */}
+      <Modal
+        isOpen={googleModalOpen}
+        onClose={() => setGoogleModalOpen(false)}
+        title="Sign in with Google"
+      >
+        <div className="py-2 space-y-4">
+          <div className="text-center space-y-1">
+            <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto shadow-inner">
+              <svg className="w-6 h-6" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+              </svg>
+            </div>
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+              Choose a Google Account
+            </h3>
+            <p className="text-xs text-slate-500">
+              to continue to <strong>CampusFlex ({selectedRole.toUpperCase()})</strong>
+            </p>
+          </div>
+
+          <div className="space-y-2 pt-2">
+            {/* Account Option 1 */}
+            <button
+              onClick={() => handleGoogleSelect('ananya.nair.student@gmail.com', 'Ananya Nair (Google Student)', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80')}
+              className="w-full p-3 rounded-2xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-between text-left cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <img
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80"
+                  alt="Google Account"
+                  className="w-9 h-9 rounded-full object-cover ring-2 ring-primary-500/20"
+                />
+                <div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-slate-100">Ananya Nair</div>
+                  <div className="text-[11px] text-slate-500">ananya.nair.student@gmail.com</div>
+                </div>
+              </div>
+              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Google Verified</span>
+            </button>
+
+            {/* Custom Google Email Input Option */}
+            <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 block">
+                Or enter another Google Email:
+              </span>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  value={customGoogleEmail}
+                  onChange={(e) => setCustomGoogleEmail(e.target.value)}
+                  placeholder="your.name@gmail.com"
+                  className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-slate-100"
+                />
+                <button
+                  onClick={() => {
+                    if (customGoogleEmail.trim()) {
+                      handleGoogleSelect(customGoogleEmail, customGoogleEmail.split('@')[0]);
+                    }
+                  }}
+                  className="px-4 py-2 bg-[#5B46E5] text-white text-xs font-bold rounded-xl shadow-md cursor-pointer"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
 
       {/* Forgot Password Modal */}
       <Modal

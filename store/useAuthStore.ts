@@ -13,6 +13,7 @@ interface AuthState {
   isAuthenticated: boolean;
   switchRole: (role: UserRole) => void;
   login: (email: string, password?: string, role?: UserRole) => AuthLoginResponse;
+  loginWithGoogle: (email: string, name: string, avatar?: string, role?: UserRole) => boolean;
   logout: () => void;
   register: (user: Partial<User>) => void;
   updateProfile: (updatedData: Partial<User>) => void;
@@ -75,6 +76,36 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Successful Authentication
     set({ currentUser: matchedUser, isAuthenticated: true });
     return { success: true };
+  },
+
+  loginWithGoogle: (email: string, name: string, avatar?: string, role?: UserRole) => {
+    const cleanEmail = email.trim().toLowerCase();
+    const existing = get().usersList.find((u) => u.email.toLowerCase() === cleanEmail);
+    if (existing) {
+      set({ currentUser: existing, isAuthenticated: true });
+      return true;
+    }
+
+    const googleUser: User = {
+      id: `user-google-${Date.now()}`,
+      name: name || 'Google Student',
+      email: cleanEmail,
+      role: role || 'student',
+      avatar: avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
+      verified: true,
+      department: 'Computer Science',
+      year: 'Semester 4',
+      skills: ['Teaching', 'Communication', 'Mathematics'],
+      status: 'active',
+      createdAt: new Date().toISOString(),
+    };
+
+    set((state) => ({
+      usersList: [...state.usersList, googleUser],
+      currentUser: googleUser,
+      isAuthenticated: true,
+    }));
+    return true;
   },
 
   logout: () => {
