@@ -1,0 +1,27 @@
+name: CampusFlex CI/CD Production Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build with Maven & Run Unit Tests
+      run: mvn clean test
+
+    - name: Build Production JAR
+      run: mvn package -DskipTests
