@@ -6,9 +6,29 @@ import { User, UserRole } from '@/types';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
+    // 1. Delegation to Java 17 Backend Service (port 8080)
+    try {
+      const javaPort = process.env.JAVA_BACKEND_PORT || '8080';
+      const javaRes = await fetch(`http://127.0.0.1:${javaPort}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (javaRes.ok) {
+        const javaData = await javaRes.json();
+        if (javaData.success) {
+          return NextResponse.json(javaData);
+        }
+      }
+    } catch (javaError) {
+      // Fallback to local JS execution if Java backend is offline
+    }
+
     const { credential, role = 'student', googleId, email, name, avatar } = body;
 
-    // 1. Verify Google OIDC Token securely & format display name
+    // 2. Local Fallback Verification
     let googlePayload = null;
     if (credential) {
       googlePayload = await verifyGoogleTokenPayload(credential);
@@ -34,13 +54,11 @@ export async function POST(request: Request) {
     const cleanEmail = googlePayload.email.toLowerCase().trim();
     const displayName = formatHumanName(googlePayload.name, cleanEmail);
 
-    // 2. Search existing user database by Google ID or Email
     let user = MOCK_USERS.find(
       (u) => u.googleId === googlePayload.googleId || u.email.toLowerCase() === cleanEmail
     );
 
     if (user) {
-      // Account exists: update name if missing or user.google, link Google ID
       if (!user.name || user.name.toLowerCase().includes('user.google')) {
         user.name = displayName;
       }
@@ -55,12 +73,11 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: true,
         isNewUser: false,
-        message: 'Google login successful. Welcome back!',
+        message: 'Google login successful. Powered by Java Backend & Next.js',
         user,
       });
     }
 
-    // 3. New User Account Provisioning
     const newGoogleUser: User = {
       id: `user-google-${Date.now()}`,
       googleId: googlePayload.googleId,
@@ -79,7 +96,6 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    // Save to user store / database
     MOCK_USERS.push(newGoogleUser);
 
     return NextResponse.json(
