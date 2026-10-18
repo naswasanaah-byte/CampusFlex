@@ -18,6 +18,7 @@ export const Navbar: React.FC = () => {
 
   const getDashboardPath = () => {
     if (!currentUser) return '/login';
+    if (currentUser.role === 'admin') return '/admin/dashboard';
     return currentUser.role === 'employer' ? '/employer/dashboard' : '/student/dashboard';
   };
 
@@ -48,8 +49,14 @@ export const Navbar: React.FC = () => {
                 Find Jobs
               </Link>
               {isAuthenticated && (
-                <Link href={getDashboardPath()} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                  Dashboard
+                <Link href={getDashboardPath()} className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors flex items-center gap-1.5">
+                  {currentUser?.role === 'admin' ? (
+                    <span className="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 font-extrabold text-xs border border-purple-300 dark:border-purple-800">
+                      🛡️ Admin Console
+                    </span>
+                  ) : (
+                    'Dashboard'
+                  )}
                 </Link>
               )}
             </nav>

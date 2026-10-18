@@ -20,7 +20,8 @@ import {
   Star,
   LogOut,
   Sparkles,
-  GraduationCap
+  GraduationCap,
+  ShieldCheck
 } from 'lucide-react';
 import { formatHumanName } from '@/lib/googleAuth';
 
@@ -54,7 +55,16 @@ export const Sidebar: React.FC = () => {
     { label: 'Settings', href: '/student/settings', icon: Settings },
   ];
 
-  const links = role === 'employer' ? employerLinks : studentLinks;
+  const adminLinks = [
+    { label: 'Overview', href: '/admin/dashboard', icon: LayoutDashboard },
+    { label: 'Manage Users', href: '/admin/users', icon: Users },
+    { label: 'Job Moderation', href: '/admin/jobs', icon: Briefcase },
+    { label: 'AI Governance', href: '/admin/ai-governance', icon: ShieldCheck },
+    { label: 'Applications', href: '/admin/applications', icon: Clock },
+    { label: 'Platform Settings', href: '/admin/settings', icon: Settings },
+  ];
+
+  const links = role === 'admin' ? adminLinks : role === 'employer' ? employerLinks : studentLinks;
 
   const handleLogout = () => {
     logout();
@@ -73,9 +83,14 @@ export const Sidebar: React.FC = () => {
           <span className="text-xl font-black tracking-tight text-white">
             CampusFlex
           </span>
+          {role === 'admin' && (
+            <span className="ml-auto px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-200 text-[10px] font-extrabold border border-purple-400/30">
+              ADMIN
+            </span>
+          )}
         </Link>
 
-        {/* Student Avatar Card & Profile Completion Bar */}
+        {/* User Avatar Card */}
         {(() => {
           const completion = (currentUser.skills && currentUser.skills.length > 0) ? 80 : 35;
           return (
@@ -90,24 +105,35 @@ export const Sidebar: React.FC = () => {
                   <h4 className="text-sm font-black text-white truncate">
                     {formatHumanName(currentUser.name, currentUser.email)}
                   </h4>
-                  <p className="text-[11px] text-indigo-200 truncate">
-                    {currentUser.department || 'Student'} • {currentUser.year || 'Member'}
+                  <p className="text-[11px] text-indigo-200 truncate capitalize">
+                    {currentUser.role === 'admin' ? '🛡️ Super Admin' : (currentUser.department || 'Student') + ' • ' + (currentUser.year || 'Member')}
                   </p>
                 </div>
               </div>
 
-              {/* Profile Completion Bar */}
+              {/* Status or Completion Bar */}
               <div className="space-y-1 pt-1 border-t border-white/10">
-                <div className="flex items-center justify-between text-[10px] font-bold text-indigo-200">
-                  <span>Profile Completion</span>
-                  <span className="text-indigo-300">{completion}%</span>
-                </div>
-                <div className="w-full h-1.5 bg-indigo-950/80 rounded-full overflow-hidden">
-                  <div
-                    style={{ width: `${completion}%` }}
-                    className="h-full bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full transition-all duration-500"
-                  />
-                </div>
+                {currentUser.role === 'admin' ? (
+                  <div className="flex items-center justify-between text-[10px] font-bold text-indigo-200">
+                    <span>Engine Status</span>
+                    <span className="text-emerald-300 font-extrabold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Java 17 Online
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between text-[10px] font-bold text-indigo-200">
+                      <span>Profile Completion</span>
+                      <span className="text-indigo-300">{completion}%</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-indigo-950/80 rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${completion}%` }}
+                        className="h-full bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full transition-all duration-500"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           );

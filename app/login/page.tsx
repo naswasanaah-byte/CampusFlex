@@ -78,7 +78,8 @@ export default function LoginPage() {
 
     const res = login(email, password, selectedRole);
     if (res.success) {
-      if (selectedRole === 'employer') router.push('/employer/dashboard');
+      if (selectedRole === 'admin') router.push('/admin/dashboard');
+      else if (selectedRole === 'employer') router.push('/employer/dashboard');
       else router.push('/student/dashboard');
     } else {
       setError(res.message || 'Invalid email or password. Please check your credentials.');
@@ -90,7 +91,8 @@ export default function LoginPage() {
     const res = await loginWithGoogle(gEmail, gName, avatarUrl, selectedRole, tokenPayload);
     if (res.success) {
       setGoogleModalOpen(false);
-      if (selectedRole === 'employer') router.push('/employer/dashboard');
+      if (selectedRole === 'admin') router.push('/admin/dashboard');
+      else if (selectedRole === 'employer') router.push('/employer/dashboard');
       else router.push('/student/dashboard');
     } else {
       setError(res.message || 'Google authentication failed.');
@@ -247,10 +249,13 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-3.5">
 
               {/* Role Switcher Tabs */}
-              <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl">
+              <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl">
                 <button
                   type="button"
-                  onClick={() => setSelectedRole('student')}
+                  onClick={() => {
+                    setSelectedRole('student');
+                    if (email === 'admin@campusflex.edu') setEmail('');
+                  }}
                   className={`py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
                     selectedRole === 'student'
                       ? 'bg-[#5B46E5] text-white shadow-md'
@@ -261,7 +266,10 @@ export default function LoginPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setSelectedRole('employer')}
+                  onClick={() => {
+                    setSelectedRole('employer');
+                    if (email === 'admin@campusflex.edu') setEmail('');
+                  }}
                   className={`py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
                     selectedRole === 'employer'
                       ? 'bg-[#5B46E5] text-white shadow-md'
@@ -269,6 +277,21 @@ export default function LoginPage() {
                   }`}
                 >
                   Employer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedRole('admin');
+                    setEmail('admin@campusflex.edu');
+                    setPassword('password123');
+                  }}
+                  className={`py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
+                    selectedRole === 'admin'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                  }`}
+                >
+                  🛡️ Admin
                 </button>
               </div>
 

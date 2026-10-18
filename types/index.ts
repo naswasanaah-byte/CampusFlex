@@ -1,4 +1,4 @@
-export type UserRole = 'student' | 'employer';
+export type UserRole = 'student' | 'employer' | 'admin';
 
 export interface User {
   id: string;
@@ -26,7 +26,7 @@ export interface User {
   createdAt: string;
 }
 
-export type JobStatus = 'AVAILABLE' | 'FILLED';
+export type JobStatus = 'AVAILABLE' | 'FILLED' | 'FLAGGED';
 export type WorkType = 'Part-Time' | 'Weekend' | 'Evening' | 'Remote' | 'Flexible' | 'On-Campus';
 
 export interface Job {

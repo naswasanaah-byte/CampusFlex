@@ -24,7 +24,9 @@ interface AuthState {
   register: (user: Partial<User>) => void;
   updateProfile: (updatedData: Partial<User>) => void;
   toggleVerifyEmployer: (employerId: string) => void;
+  toggleVerifyUser: (userId: string) => void;
   toggleUserStatus: (userId: string) => void;
+  deleteUser: (userId: string) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -209,6 +211,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
   },
 
+  toggleVerifyUser: (userId: string) => {
+    set((state) => {
+      const updatedList = state.usersList.map((u) => {
+        if (u.id === userId) {
+          return { ...u, verified: !u.verified };
+        }
+        return u;
+      });
+      const currentUser = state.currentUser?.id === userId
+        ? { ...state.currentUser, verified: !state.currentUser.verified }
+        : state.currentUser;
+
+      return { usersList: updatedList, currentUser };
+    });
+  },
+
   toggleUserStatus: (userId: string) => {
     set((state) => {
       const updatedList: User[] = state.usersList.map((u) => {
@@ -220,5 +238,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
       return { usersList: updatedList };
     });
+  },
+
+  deleteUser: (userId: string) => {
+    set((state) => ({
+      usersList: state.usersList.filter((u) => u.id !== userId)
+    }));
   },
 }));
