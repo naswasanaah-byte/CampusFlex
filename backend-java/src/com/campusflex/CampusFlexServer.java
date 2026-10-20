@@ -117,6 +117,14 @@ public class CampusFlexServer {
                     email = "user.google@gmail.com";
                 }
 
+                if ("admin".equalsIgnoreCase(role)) {
+                    String clean = email.toLowerCase().trim();
+                    if (!clean.equals("avanislavanisl536@gmail.com") && !clean.equals("avanislavanisl536")) {
+                        sendResponse(exchange, 403, "{\"success\":false,\"error\":\"Access Denied: Only avanislavanisl536 is authorized for Administrator access.\"}");
+                        return;
+                    }
+                }
+
                 User user = GoogleAuthService.processGoogleAuth(email, name, avatar, role);
 
                 String userJson = String.format(
@@ -147,6 +155,14 @@ public class CampusFlexServer {
                 String role = extractJsonField(body, "role");
                 if (email == null) email = "student@university.edu";
                 if (role == null) role = "student";
+
+                if ("admin".equalsIgnoreCase(role)) {
+                    String clean = email.toLowerCase().trim();
+                    if (!clean.equals("avanislavanisl536@gmail.com") && !clean.equals("avanislavanisl536")) {
+                        sendResponse(exchange, 403, "{\"success\":false,\"error\":\"Access Denied: Only avanislavanisl536 is authorized for Administrator access.\"}");
+                        return;
+                    }
+                }
 
                 String name = GoogleAuthService.formatHumanName(null, email);
                 String userJson = String.format(
@@ -251,7 +267,7 @@ public class CampusFlexServer {
                     "\"success\":true," +
                     "\"count\":3," +
                     "\"users\":[" +
-                    "{\"id\":\"user-admin-1\",\"name\":\"CampusFlex Admin\",\"email\":\"admin@campusflex.edu\",\"role\":\"admin\",\"status\":\"active\",\"verified\":true}," +
+                    "{\"id\":\"user-admin-1\",\"name\":\"Avani SL\",\"email\":\"avanislavanisl536@gmail.com\",\"role\":\"admin\",\"status\":\"active\",\"verified\":true}," +
                     "{\"id\":\"user-student-1\",\"name\":\"Student User\",\"email\":\"student@university.edu\",\"role\":\"student\",\"status\":\"active\",\"verified\":true}," +
                     "{\"id\":\"user-employer-1\",\"name\":\"Bright Academy\",\"email\":\"hiring@brightacademy.com\",\"role\":\"employer\",\"status\":\"active\",\"verified\":true}" +
                     "]" +

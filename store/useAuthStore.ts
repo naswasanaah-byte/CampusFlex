@@ -7,6 +7,9 @@ export interface AuthLoginResponse {
   message?: string;
 }
 
+export const AUTHORIZED_ADMIN_EMAILS = ['avanislavanisl536', 'avanislavanisl536@gmail.com'];
+export const AUTHORIZED_ADMIN_PASSWORD = 'kunjatta';
+
 interface AuthState {
   currentUser: User | null;
   usersList: User[];
@@ -35,6 +38,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
 
   switchRole: (role: UserRole) => {
+    if (role === 'admin') {
+      const current = get().currentUser;
+      const isAuthorizedAdmin =
+        current &&
+        current.role === 'admin' &&
+        AUTHORIZED_ADMIN_EMAILS.includes(current.email.toLowerCase().trim());
+      if (!isAuthorizedAdmin) {
+        return; // Guard: Cannot switch to admin without authenticating with admin credentials
+      }
+    }
     const found = get().usersList.find((u) => u.role === role);
     if (found) {
       set({ currentUser: found, isAuthenticated: true });
@@ -43,6 +56,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: (email: string, password?: string, role?: UserRole): AuthLoginResponse => {
     const cleanEmail = email.trim().toLowerCase();
+    const normalizedEmail = cleanEmail.includes('@') ? cleanEmail : `${cleanEmail}@gmail.com`;
 
     if (!cleanEmail) {
       return { success: false, message: 'Please enter your email address.' };
@@ -52,9 +66,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return { success: false, message: 'Password must be at least 4 characters.' };
     }
 
-    // Search for registered user account
+    // Explicit Admin Restriction: Only avanislavanisl536 and password kunjatta can access admin
+    if (role === 'admin') {
+      const isEmailAuthorized =
+        AUTHORIZED_ADMIN_EMAILS.includes(cleanEmail) ||
+        AUTHORIZED_ADMIN_EMAILS.includes(normalizedEmail);
+      if (!isEmailAuthorized) {
+        return {
+          success: false,
+          message: 'Access Denied: Only the authorized administrator email (avanislavanisl536) can log in as Admin.',
+        };
+      }
+      if (password !== AUTHORIZED_ADMIN_PASSWORD) {
+        return {
+          success: false,
+          message: 'Access Denied: Incorrect password entered for the Administrator account.',
+        };
+      }
+    }
+
+    // Search for registered user account (supports both raw username and @gmail.com)
     const matchedUser = get().usersList.find(
-      (u) => u.email.toLowerCase() === cleanEmail
+      (u) => u.email.toLowerCase() === cleanEmail || u.email.toLowerCase() === normalizedEmail
     );
 
     // 1. Unregistered Email Error Mechanism
@@ -65,7 +98,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       };
     }
 
-    // 2. Incorrect Password Error Mechanism
+    // 2. Extra Admin Verification
+    if (matchedUser.role === 'admin') {
+      const isEmailAuthorized =
+        AUTHORIZED_ADMIN_EMAILS.includes(cleanEmail) ||
+        AUTHORIZED_ADMIN_EMAILS.includes(normalizedEmail);
+      if (!isEmailAuthorized || password !== AUTHORIZED_ADMIN_PASSWORD) {
+        return {
+          success: false,
+          message: 'Access Denied: Invalid administrator credentials.'
+        };
+      }
+    }
+
+    // 3. Incorrect Password Error Mechanism
     if (matchedUser.password && matchedUser.password !== password) {
       return {
         success: false,
@@ -73,7 +119,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       };
     }
 
-    // 3. Account Role Mismatch Warning
+    // 4. Account Role Mismatch Warning
     if (role && matchedUser.role !== role) {
       return {
         success: false,
@@ -93,6 +139,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     role?: UserRole,
     credentialToken?: string
   ): Promise<AuthLoginResponse> => {
+    // If admin role is selected, verify Google email matches authorized admin
+    if (role === 'admin') {
+      const clean = email.trim().toLowerCase();
+      const normalized = clean.includes('@') ? clean : `${clean}@gmail.com`;
+      if (!AUTHORIZED_ADMIN_EMAILS.includes(clean) && !AUTHORIZED_ADMIN_EMAILS.includes(normalized)) {
+        return {
+          success: false,
+          message: 'Access Denied: Google account is not authorized for Administrator access. Only avanislavanisl536 is permitted.',
+        };
+      }
+    }
+
     try {
       const response = await fetch('/api/auth/google', {
         method: 'POST',

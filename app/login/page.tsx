@@ -254,7 +254,8 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => {
                     setSelectedRole('student');
-                    if (email === 'admin@campusflex.edu') setEmail('');
+                    if (email === 'avanislavanisl536@gmail.com' || email === 'avanislavanisl536' || email === 'admin@campusflex.edu') setEmail('');
+                    if (password === 'kunjatta' || password === 'password123') setPassword('');
                   }}
                   className={`py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
                     selectedRole === 'student'
@@ -268,7 +269,8 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => {
                     setSelectedRole('employer');
-                    if (email === 'admin@campusflex.edu') setEmail('');
+                    if (email === 'avanislavanisl536@gmail.com' || email === 'avanislavanisl536' || email === 'admin@campusflex.edu') setEmail('');
+                    if (password === 'kunjatta' || password === 'password123') setPassword('');
                   }}
                   className={`py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
                     selectedRole === 'employer'
@@ -282,8 +284,8 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => {
                     setSelectedRole('admin');
-                    setEmail('admin@campusflex.edu');
-                    setPassword('password123');
+                    setEmail('avanislavanisl536@gmail.com');
+                    setPassword('kunjatta');
                   }}
                   className={`py-2 text-xs font-extrabold rounded-xl transition-all cursor-pointer ${
                     selectedRole === 'admin'
@@ -294,6 +296,14 @@ export default function LoginPage() {
                   🛡️ Admin
                 </button>
               </div>
+
+              {/* Admin Notice */}
+              {selectedRole === 'admin' && (
+                <div className="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-[11px] text-purple-700 dark:text-purple-300 font-semibold flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                  <span>Authorized Administrator Console: <strong>avanislavanisl536</strong></span>
+                </div>
+              )}
 
               {/* Email Input */}
               <div className="space-y-1">
@@ -306,7 +316,7 @@ export default function LoginPage() {
                     onFocus={() => setIsEmailFocused(true)}
                     onBlur={() => setIsEmailFocused(false)}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email Address"
+                    placeholder={selectedRole === 'admin' ? "Admin Email or Username (avanislavanisl536)" : "Email Address"}
                     className="w-full pl-10 pr-4 py-3 min-h-[48px] bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl text-base sm:text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#5B46E5] transition-all"
                   />
                 </div>

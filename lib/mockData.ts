@@ -38,9 +38,9 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: 'user-admin-1',
-    name: 'CampusFlex Admin',
-    email: 'admin@campusflex.edu',
-    password: 'password123',
+    name: 'Avani SL',
+    email: 'avanislavanisl536@gmail.com',
+    password: 'kunjatta',
     role: 'admin',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
     verified: true,

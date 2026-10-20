@@ -54,6 +54,20 @@ export async function POST(request: Request) {
     const cleanEmail = googlePayload.email.toLowerCase().trim();
     const displayName = formatHumanName(googlePayload.name, cleanEmail);
 
+    if (role === 'admin') {
+      const isAuthorized =
+        cleanEmail === 'avanislavanisl536@gmail.com' || cleanEmail === 'avanislavanisl536';
+      if (!isAuthorized) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Access Denied: Google account is not authorized for Administrator access. Only avanislavanisl536 is permitted.',
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     let user = MOCK_USERS.find(
       (u) => u.googleId === googlePayload.googleId || u.email.toLowerCase() === cleanEmail
     );

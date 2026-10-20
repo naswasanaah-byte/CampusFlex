@@ -120,6 +120,13 @@ export default function AdminDashboard() {
             <p className="text-xs text-purple-200 max-w-xl">
               Real-time oversight for student part-time jobs, autonomous AI verification, employer credentials, and campus shift safety.
             </p>
+            <div className="flex items-center gap-2 pt-1 text-xs text-purple-200 font-semibold">
+              <span className="text-purple-300">Authorized Administrator:</span>
+              <span className="text-white font-extrabold">{currentUser?.name || 'Avani SL'}</span>
+              <span className="px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-200 text-[11px] font-mono border border-purple-400/30">
+                {currentUser?.email || 'avanislavanisl536@gmail.com'}
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
