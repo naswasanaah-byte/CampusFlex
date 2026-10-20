@@ -120,7 +120,7 @@ public class CampusFlexServer {
                 if ("admin".equalsIgnoreCase(role)) {
                     String clean = email.toLowerCase().trim();
                     if (!clean.equals("avanislavanisl536@gmail.com") && !clean.equals("avanislavanisl536")) {
-                        sendResponse(exchange, 403, "{\"success\":false,\"error\":\"Access Denied: Only avanislavanisl536 is authorized for Administrator access.\"}");
+                        sendResponse(exchange, 403, "{\"success\":false,\"error\":\"Access Denied: Unauthorized administrator access.\"}");
                         return;
                     }
                 }
@@ -159,7 +159,7 @@ public class CampusFlexServer {
                 if ("admin".equalsIgnoreCase(role)) {
                     String clean = email.toLowerCase().trim();
                     if (!clean.equals("avanislavanisl536@gmail.com") && !clean.equals("avanislavanisl536")) {
-                        sendResponse(exchange, 403, "{\"success\":false,\"error\":\"Access Denied: Only avanislavanisl536 is authorized for Administrator access.\"}");
+                        sendResponse(exchange, 403, "{\"success\":false,\"error\":\"Access Denied: Unauthorized administrator access.\"}");
                         return;
                     }
                 }

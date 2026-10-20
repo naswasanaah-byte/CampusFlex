@@ -17,10 +17,11 @@ export async function GET() {
     }
   } catch (err) {}
 
+  const safeUsers = MOCK_USERS.map(({ password, ...u }) => u);
   return NextResponse.json({
     success: true,
-    count: MOCK_USERS.length,
-    users: MOCK_USERS,
+    count: safeUsers.length,
+    users: safeUsers,
   });
 }
 

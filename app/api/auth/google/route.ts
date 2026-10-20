@@ -61,7 +61,7 @@ export async function POST(request: Request) {
         return NextResponse.json(
           {
             success: false,
-            error: 'Access Denied: Google account is not authorized for Administrator access. Only avanislavanisl536 is permitted.',
+            error: 'Access Denied: This Google account is not authorized for administrator access.',
           },
           { status: 403 }
         );

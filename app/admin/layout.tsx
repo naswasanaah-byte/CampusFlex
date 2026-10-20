@@ -55,18 +55,18 @@ export default function AdminLayout({
               Administrator Access Only
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              This interface is strictly restricted. Only the verified platform administrator (<strong>avanislavanisl536</strong>) with the authorized master key can access and control the CampusFlex Admin Console.
+              This interface is strictly restricted to authorized platform administrators. Access is logged and monitored.
             </p>
           </div>
 
           <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-left text-xs space-y-2">
             <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 font-semibold">
-              <span>Authorized Admin Email:</span>
-              <span className="font-mono text-purple-600 dark:text-purple-400 font-bold">avanislavanisl536</span>
+              <span>Security Clearance:</span>
+              <span className="font-semibold text-purple-600 dark:text-purple-400">System Administrator</span>
             </div>
             <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 font-semibold">
-              <span>Current Status:</span>
-              <span className="text-rose-500 font-bold">Access Denied</span>
+              <span>Access Status:</span>
+              <span className="text-rose-500 font-bold">Unauthorized</span>
             </div>
           </div>
 

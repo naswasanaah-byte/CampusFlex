@@ -66,21 +66,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return { success: false, message: 'Password must be at least 4 characters.' };
     }
 
-    // Explicit Admin Restriction: Only avanislavanisl536 and password kunjatta can access admin
+    // Explicit Admin Restriction: Only authorized credentials can access admin
     if (role === 'admin') {
       const isEmailAuthorized =
         AUTHORIZED_ADMIN_EMAILS.includes(cleanEmail) ||
         AUTHORIZED_ADMIN_EMAILS.includes(normalizedEmail);
-      if (!isEmailAuthorized) {
+      if (!isEmailAuthorized || password !== AUTHORIZED_ADMIN_PASSWORD) {
         return {
           success: false,
-          message: 'Access Denied: Only the authorized administrator email (avanislavanisl536) can log in as Admin.',
-        };
-      }
-      if (password !== AUTHORIZED_ADMIN_PASSWORD) {
-        return {
-          success: false,
-          message: 'Access Denied: Incorrect password entered for the Administrator account.',
+          message: 'Invalid administrator credentials. Access denied.',
         };
       }
     }
@@ -146,7 +140,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (!AUTHORIZED_ADMIN_EMAILS.includes(clean) && !AUTHORIZED_ADMIN_EMAILS.includes(normalized)) {
         return {
           success: false,
-          message: 'Access Denied: Google account is not authorized for Administrator access. Only avanislavanisl536 is permitted.',
+          message: 'Access Denied: This Google account is not authorized for administrator access.',
         };
       }
     }

@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server';
 import { MOCK_USERS } from '@/lib/mockData';
 
+const sanitizeUser = (user: any) => {
+  if (!user) return user;
+  const { password, ...safe } = user;
+  return safe;
+};
+
 export async function GET() {
-  return NextResponse.json({ success: true, users: MOCK_USERS });
+  const safeUsers = MOCK_USERS.map(sanitizeUser);
+  return NextResponse.json({ success: true, users: safeUsers });
 }
 
 export async function POST(request: Request) {
@@ -10,20 +17,30 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, role } = body;
 
+    const cleanEmail = email ? email.toLowerCase().trim() : '';
+
+    if (role === 'admin') {
+      const isAuthorized =
+        cleanEmail === 'avanislavanisl536@gmail.com' || cleanEmail === 'avanislavanisl536';
+      if (!isAuthorized) {
+        return NextResponse.json({ success: false, error: 'Unauthorized administrator access' }, { status: 403 });
+      }
+    }
+
     const user = MOCK_USERS.find(
-      (u) => u.email.toLowerCase() === email?.toLowerCase() || (role && u.role === role)
+      (u) => u.email.toLowerCase() === cleanEmail
     );
 
     if (user) {
-      return NextResponse.json({ success: true, user });
+      return NextResponse.json({ success: true, user: sanitizeUser(user) });
     }
 
     return NextResponse.json({
       success: true,
       user: {
         id: `user-${Date.now()}`,
-        name: email.split('@')[0],
-        email,
+        name: cleanEmail ? cleanEmail.split('@')[0] : 'User',
+        email: cleanEmail,
         role: role || 'student',
         verified: true,
         createdAt: new Date().toISOString(),
