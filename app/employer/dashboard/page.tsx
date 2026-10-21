@@ -62,7 +62,7 @@ export default function EmployerDashboard() {
             value={activeJobs.length}
             subtitle={`${filledJobs.length} positions filled`}
             icon={Briefcase}
-            trend="+1 this month"
+            trend="Active on campus"
           />
           <StatCard
             title="Pending Candidates"
@@ -80,7 +80,7 @@ export default function EmployerDashboard() {
           />
           <StatCard
             title="Smart Quota Fill Rate"
-            value="85%"
+            value={employerJobs.length > 0 && (hiredApps.length > 0 || filledJobs.length > 0) ? `${Math.round((filledJobs.length / employerJobs.length) * 100)}%` : 'Ready'}
             subtitle="Automated close success"
             icon={ShieldCheck}
             colorGradient="from-amber-500 to-orange-600"
@@ -102,7 +102,12 @@ export default function EmployerDashboard() {
           </div>
 
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {pendingApps.map((app) => (
+            {pendingApps.length === 0 ? (
+              <div className="py-8 text-center text-slate-400 text-xs">
+                No candidates awaiting review. Post a shift or share your listing to start receiving student applications!
+              </div>
+            ) : (
+              pendingApps.map((app) => (
               <div key={app.id} className="py-3.5 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <img
@@ -132,7 +137,7 @@ export default function EmployerDashboard() {
                   </Link>
                 </div>
               </div>
-            ))}
+            )))}
           </div>
         </div>
 

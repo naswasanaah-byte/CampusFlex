@@ -18,8 +18,30 @@ export default function JobDetailPage() {
 
   const [isApplyOpen, setIsApplyOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
-  const isSaved = savedJobIds.includes(job.id);
+  const isSaved = job ? savedJobIds.includes(job.id) : false;
   const getCompanyInitials = (name: string) => name.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase();
+
+  if (!job) {
+    return (
+      <div className="flex gap-8">
+        <Sidebar />
+        <main className="flex-1 space-y-6 min-w-0">
+          <button
+            onClick={() => router.back()}
+            className="px-4 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 flex items-center gap-2 cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Jobs
+          </button>
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-12 text-center shadow-glass space-y-3">
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">Job Listing Not Found</h2>
+            <p className="text-xs text-slate-500 max-w-md mx-auto">
+              This job posting may have been filled, removed, or is awaiting administrator verification.
+            </p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex gap-8">

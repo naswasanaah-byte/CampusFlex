@@ -79,43 +79,43 @@ export class AIAdminEngine {
     return [
       {
         id: 'log-101',
-        timestamp: new Date(Date.now() - 3 * 60000).toISOString(),
+        timestamp: new Date().toISOString(),
         type: 'VERIFICATION',
-        targetName: 'TechCorp Innovations',
-        action: 'Verified Employer Domain Signature',
-        confidenceScore: 99.4,
+        targetName: 'CampusFlex Core Platform',
+        action: 'System Initialized',
+        confidenceScore: 100.0,
         status: 'PASSED',
-        details: 'Confirmed university incubator partner agreement #TC-2026.'
+        details: 'Platform initialized for campus launch. AI security guards and student protection engines active.'
       },
       {
         id: 'log-102',
-        timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
-        type: 'SMART_CLOSE',
-        targetName: 'Campus Social Media Coordinator',
-        action: 'Enforced Auto-Close Hiring Quota',
+        timestamp: new Date(Date.now() - 2 * 60000).toISOString(),
+        type: 'ANALYTICS',
+        targetName: 'Shift Payment Escrow',
+        action: 'Escrow Ledger Cleared',
         confidenceScore: 100.0,
-        status: 'ENFORCED',
-        details: 'Hired 2/2 required candidates. Job status changed to FILLED; 4 pending candidates notified.'
+        status: 'PASSED',
+        details: 'Total shift earnings reset to ₹0. Escrow awaiting first completed campus shift.'
       },
       {
         id: 'log-103',
-        timestamp: new Date(Date.now() - 42 * 60000).toISOString(),
-        type: 'FRAUD_PREVENTION',
-        targetName: 'Unregistered Telegram Bot Job',
-        action: 'Blocked Fake Job Post',
-        confidenceScore: 97.8,
-        status: 'FLAGGED',
-        details: 'AI Agent detected suspicious off-platform payment link. Listing blocked instantly.'
+        timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
+        type: 'VERIFICATION',
+        targetName: 'Employer Verification Gatekeeper',
+        action: 'Gatekeeper Active',
+        confidenceScore: 99.4,
+        status: 'PASSED',
+        details: 'All employer registrations locked pending Super Admin credential verification.'
       },
       {
         id: 'log-104',
-        timestamp: new Date(Date.now() - 120 * 60000).toISOString(),
-        type: 'ANALYTICS',
-        targetName: 'Campus Marketplace Network',
-        action: 'Re-calibrated Skill Match Engine',
-        confidenceScore: 98.9,
+        timestamp: new Date(Date.now() - 10 * 60000).toISOString(),
+        type: 'FRAUD_PREVENTION',
+        targetName: 'Student Safety Policy',
+        action: '3-Report Removal Rule Enforced',
+        confidenceScore: 100.0,
         status: 'PASSED',
-        details: 'Processed 245 active student profiles; match precision at 96.2%.'
+        details: 'Student safety 3-report auto-removal policy active. 0 violations recorded.'
       }
     ];
   }

@@ -38,9 +38,9 @@ const initialFilters: JobFilters = {
 
 export const useJobStore = create<JobState>((set, get) => ({
   jobs: MOCK_JOBS,
-  savedJobIds: ['job-101'],
+  savedJobIds: [],
   filters: initialFilters,
-  searchHistory: ['React developer', 'Catering', 'Remote Python'],
+  searchHistory: [],
 
   setSearchQuery: (query: string) => {
     set((state) => ({

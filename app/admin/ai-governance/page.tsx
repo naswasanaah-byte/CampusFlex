@@ -81,7 +81,7 @@ export default function AdminAIGovernancePage() {
               99.4%
             </div>
             <p className="text-[11px] text-slate-400">
-              Evaluated across 240+ profile and posting scans.
+              Fresh launch state • Continuous real-time scans active.
             </p>
           </div>
 
@@ -91,10 +91,10 @@ export default function AdminAIGovernancePage() {
               <AlertTriangle className="w-4 h-4 text-rose-500" />
             </div>
             <div className="text-3xl font-black text-rose-600 dark:text-rose-400">
-              14
+              0
             </div>
             <p className="text-[11px] text-slate-400">
-              Suspicious wire/crypto/telegram terms caught automatically.
+              Suspicious wire/crypto/telegram terms caught automatically. 0 at launch.
             </p>
           </div>
 
@@ -104,10 +104,10 @@ export default function AdminAIGovernancePage() {
               <Lock className="w-4 h-4 text-purple-500" />
             </div>
             <div className="text-3xl font-black text-purple-600 dark:text-purple-400">
-              28
+              0
             </div>
             <p className="text-[11px] text-slate-400">
-              Hiring quotas reached; candidates auto-notified.
+              Hiring quotas reached; candidates auto-notified. 0 shifts closed yet.
             </p>
           </div>
         </div>

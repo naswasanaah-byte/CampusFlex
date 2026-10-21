@@ -56,7 +56,12 @@ export default function StudentApplicationsPage() {
         {/* Application Cards List (Matching Mockup Screen 5) */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-glass space-y-4">
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {filteredApps.map((app) => {
+            {filteredApps.length === 0 ? (
+              <div className="py-12 text-center text-slate-400 text-xs">
+                No job applications submitted yet. Browse active student shifts to get started!
+              </div>
+            ) : (
+              filteredApps.map((app) => {
               const statusColor =
                 app.status === 'ACCEPTED'
                   ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
@@ -104,7 +109,7 @@ export default function StudentApplicationsPage() {
                   </div>
                 </div>
               );
-            })}
+            }))}
           </div>
         </div>
 

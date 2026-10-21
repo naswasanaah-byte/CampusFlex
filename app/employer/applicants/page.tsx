@@ -61,7 +61,16 @@ export default function ApplicantsPage() {
 
         {/* Applicants List Grid */}
         <div className="space-y-6">
-          {applications.map((app) => {
+          {applications.length === 0 ? (
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-12 text-center shadow-glass space-y-3">
+              <Users className="w-10 h-10 text-slate-300 mx-auto" />
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">No Applicants Yet</h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Once students browse your smart shift postings and submit applications, their AI compatibility score and credentials will appear here.
+              </p>
+            </div>
+          ) : (
+            applications.map((app) => {
             const job = jobs.find((j) => j.id === app.jobId);
             const isFilled = job?.status === 'FILLED';
 
@@ -161,7 +170,7 @@ export default function ApplicantsPage() {
 
               </div>
             );
-          })}
+          }))}
         </div>
 
         {/* Schedule Interview Modal */}
