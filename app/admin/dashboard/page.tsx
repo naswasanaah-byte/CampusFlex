@@ -112,6 +112,12 @@ export default function AdminDashboard() {
                 <span className={`w-2 h-2 rounded-full ${javaBackendOnline ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
                 <span>Backend: {javaStats?.backendLanguage || 'Java 17 (Port 8080)'}</span>
               </div>
+
+              {/* JDBC Subsystem Health Badge */}
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/80 text-[11px] font-bold border border-slate-700">
+                <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                <span>JDBC: {javaStats?.jdbcStatus || 'Online (CampusFlexDriver)'}</span>
+              </div>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight">

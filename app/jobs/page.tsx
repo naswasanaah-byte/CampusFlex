@@ -16,9 +16,10 @@ export default function JobsPage() {
 
   const filteredJobs = jobs.filter(
     (j) =>
-      j.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      j.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      j.skillsRequired.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()))
+      j.status !== 'SUSPENDED' &&
+      (j.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        j.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        j.skillsRequired.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase())))
   );
 
   const getCompanyInitials = (name: string) => {

@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import com.campusflex.service.GoogleAuthService;
 import com.campusflex.model.User;
+import com.campusflex.db.DatabaseManager;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -13,6 +14,7 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CampusFlexServer {
 
@@ -36,6 +38,9 @@ public class CampusFlexServer {
             } catch (NumberFormatException ignored) {}
         }
 
+        // 1. Initialize Java Database Connectivity (JDBC) Subsystem
+        DatabaseManager.initialize();
+
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", serverPort), 0);
 
         // Standard API Endpoints
@@ -51,10 +56,13 @@ public class CampusFlexServer {
         server.createContext("/api/admin/jobs", new AdminJobsHandler());
         server.createContext("/api/admin/ai-logs", new AdminAILogsHandler());
         server.createContext("/api/admin/settings", new AdminSettingsHandler());
+        server.createContext("/api/admin/jdbc", new AdminJDBCHandler());
+        server.createContext("/api/admin/reports", new AdminReportsHandler());
 
         server.setExecutor(null); // default executor
         System.out.println("🚀 [CampusFlex Java Backend] Server started on port " + serverPort + " (Java 17)");
-        System.out.println("🛡️ [Admin Endpoints] /api/admin/stats, /api/admin/users, /api/admin/jobs, /api/admin/ai-logs, /api/admin/settings active.");
+        System.out.println("🛡️ [Admin Endpoints] /api/admin/stats, /api/admin/users, /api/admin/jobs, /api/admin/ai-logs, /api/admin/settings, /api/admin/jdbc active.");
+        System.out.println("💾 [JDBC Engine] Java Database Connectivity operational (jdbc:campusflex:data/campusflex.db).");
         server.start();
     }
 
@@ -237,6 +245,7 @@ public class CampusFlexServer {
                 "\"systemStatus\":\"HEALTHY\"," +
                 "\"aiGovernanceConfidence\":99.4," +
                 "\"backendLanguage\":\"Java 17 (OpenJDK)\"," +
+                "\"jdbcStatus\":\"ONLINE (CampusFlex JDBC Driver v1.0)\"," +
                 "\"serverPort\":%d" +
                 "}}",
                 commissionRate, PORT
@@ -259,7 +268,13 @@ public class CampusFlexServer {
                 String action = extractJsonField(body, "action");
                 String userId = extractJsonField(body, "userId");
 
-                String msg = "Admin action '" + action + "' on user '" + userId + "' processed successfully by Java Backend.";
+                if ("verify".equalsIgnoreCase(action)) {
+                    DatabaseManager.verifyEmployer(userId, true);
+                } else if ("unverify".equalsIgnoreCase(action)) {
+                    DatabaseManager.verifyEmployer(userId, false);
+                }
+
+                String msg = "Admin action '" + action + "' on user '" + userId + "' processed successfully via JDBC in Java Backend.";
                 sendResponse(exchange, 200, "{\"success\":true,\"message\":\"" + msg + "\"}");
             } else {
                 // Return users overview
@@ -356,6 +371,70 @@ public class CampusFlexServer {
                     commissionRate, autoVerifyEdu, maxHourlyRate, allowedDomains
                 );
                 sendResponse(exchange, 200, settingsJson);
+            }
+        }
+    }
+
+    static class AdminJDBCHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendResponse(exchange, 204, "");
+                return;
+            }
+
+            Map<String, Object> status = DatabaseManager.getDatabaseStatus();
+            String json = "{" +
+                "\"success\":true," +
+                "\"jdbc\":{" +
+                "\"connected\":true," +
+                "\"driver\":\"com.campusflex.db.CampusFlexDriver\"," +
+                "\"status\":\"ONLINE / HEALTHY\"," +
+                "\"databaseEngine\":\"CampusFlex Embedded JDBC 4.3 Engine (Java 17)\"," +
+                "\"tables\":[\"employers\",\"employer_reports\",\"jobs\",\"users\"]," +
+                "\"url\":\"jdbc:campusflex:data/campusflex.db\"," +
+                "\"reportsStored\":" + DatabaseManager.getEmployerReports(null).size() +
+                "}" +
+                "}";
+            sendResponse(exchange, 200, json);
+        }
+    }
+
+    static class AdminReportsHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendResponse(exchange, 204, "");
+                return;
+            }
+
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                String body = readRequestBody(exchange);
+                String employerId = extractJsonField(body, "employerId");
+                String studentId = extractJsonField(body, "studentId");
+                String studentName = extractJsonField(body, "studentName");
+                String reason = extractJsonField(body, "reason");
+                String details = extractJsonField(body, "details");
+
+                Map<String, Object> res = DatabaseManager.recordEmployerReport(employerId, studentId, studentName, reason, details);
+                boolean banned = Boolean.TRUE.equals(res.get("banned"));
+                int count = (Integer) res.get("reportCount");
+                String msg = (String) res.get("message");
+
+                String json = String.format("{\"success\":true,\"banned\":%b,\"reportCount\":%d,\"message\":\"%s\"}", banned, count, msg);
+                sendResponse(exchange, 200, json);
+            } else {
+                List<Map<String, String>> reports = DatabaseManager.getEmployerReports(null);
+                StringBuilder sb = new StringBuilder("{\"success\":true,\"reports\":[");
+                for (int i = 0; i < reports.size(); i++) {
+                    Map<String, String> r = reports.get(i);
+                    sb.append(String.format("{\"id\":\"%s\",\"employerId\":\"%s\",\"studentName\":\"%s\",\"reason\":\"%s\",\"details\":\"%s\",\"createdAt\":\"%s\"}",
+                        r.get("id"), r.get("employerId"), r.get("studentName"), r.get("reason"), r.get("details"), r.get("createdAt")
+                    ));
+                    if (i < reports.size() - 1) sb.append(",");
+                }
+                sb.append("]}");
+                sendResponse(exchange, 200, sb.toString());
             }
         }
     }

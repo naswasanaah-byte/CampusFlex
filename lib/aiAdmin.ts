@@ -119,4 +119,20 @@ export class AIAdminEngine {
       }
     ];
   }
+
+  static createSafetyReportLog(employerName: string, reportCount: number, reason: string): AIAdminAuditLog {
+    const isEnforced = reportCount >= 3;
+    return {
+      id: `log-rep-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      type: 'FRAUD_PREVENTION',
+      targetName: employerName,
+      action: isEnforced ? 'Automated Account Removal (3 Reports)' : `Student Safety Report Logged (${reportCount}/3)`,
+      confidenceScore: 100.0,
+      status: isEnforced ? 'ENFORCED' : 'FLAGGED',
+      details: isEnforced
+        ? `Employer reached 3 verified student reports. Status set to SUSPENDED, access revoked, and jobs unlisted.`
+        : `Student report registered: "${reason}". System active under 3-strike policy.`
+    };
+  }
 }

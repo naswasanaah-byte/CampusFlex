@@ -22,6 +22,7 @@ interface JobState {
   addJob: (newJobData: Omit<Job, 'id' | 'postedAt' | 'selectedEmployees' | 'status' | 'applicationsCount' | 'viewsCount'>) => Job;
   updateJob: (jobId: string, updatedData: Partial<Job>) => void;
   deleteJob: (jobId: string) => void;
+  suspendJobsByEmployer: (employerId: string) => void;
   incrementSelectedSlot: (jobId: string) => JobStatus; // Returns new status
   addSearchHistory: (query: string) => void;
   clearSearchHistory: () => void;
@@ -92,6 +93,16 @@ export const useJobStore = create<JobState>((set, get) => ({
   deleteJob: (jobId: string) => {
     set((state) => ({
       jobs: state.jobs.filter((job) => job.id !== jobId),
+    }));
+  },
+
+  suspendJobsByEmployer: (employerId: string) => {
+    set((state) => ({
+      jobs: state.jobs.map((job) =>
+        job.companyId === employerId
+          ? { ...job, status: 'SUSPENDED' as JobStatus }
+          : job
+      ),
     }));
   },
 

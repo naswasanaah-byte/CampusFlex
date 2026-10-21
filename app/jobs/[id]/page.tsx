@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { useJobStore } from '@/store/useJobStore';
 import { ApplyModal } from '@/components/jobs/ApplyModal';
-import { ArrowLeft, Bookmark, DollarSign, Calendar, Clock, MapPin, CheckCircle2, Sparkles } from 'lucide-react';
+import { ReportEmployerModal } from '@/components/jobs/ReportEmployerModal';
+import { ArrowLeft, Bookmark, DollarSign, Calendar, Clock, MapPin, CheckCircle2, Sparkles, Flag } from 'lucide-react';
 
 export default function JobDetailPage() {
   const params = useParams();
@@ -16,6 +17,7 @@ export default function JobDetailPage() {
   const job = jobs.find((j) => j.id === jobId) || jobs[0];
 
   const [isApplyOpen, setIsApplyOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const isSaved = savedJobIds.includes(job.id);
   const getCompanyInitials = (name: string) => name.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase();
 
@@ -25,7 +27,7 @@ export default function JobDetailPage() {
 
       <main className="flex-1 space-y-6 min-w-0">
 
-        {/* Back Navigation Bar & Bookmark Action */}
+        {/* Back Navigation Bar & Actions */}
         <div className="flex items-center justify-between">
           <button
             onClick={() => router.back()}
@@ -33,12 +35,22 @@ export default function JobDetailPage() {
           >
             <ArrowLeft className="w-4 h-4" /> Back to Jobs
           </button>
-          <button
-            onClick={() => toggleSaveJob(job.id)}
-            className="p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition-colors"
-          >
-            <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-[#5B46E5] text-[#5B46E5]' : 'text-slate-400'}`} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsReportOpen(true)}
+              className="px-3.5 py-2 rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-xs font-bold hover:bg-rose-100 dark:hover:bg-rose-950/60 flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Report employer workplace or payment violation"
+            >
+              <Flag className="w-3.5 h-3.5" />
+              Report Employer
+            </button>
+            <button
+              onClick={() => toggleSaveJob(job.id)}
+              className="p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition-colors"
+            >
+              <Bookmark className={`w-5 h-5 ${isSaved ? 'fill-[#5B46E5] text-[#5B46E5]' : 'text-slate-400'}`} />
+            </button>
+          </div>
         </div>
 
         {/* Main Job Detail Card (Matching Mockup Screen 4) */}
@@ -169,6 +181,16 @@ export default function JobDetailPage() {
           job={job}
           isOpen={isApplyOpen}
           onClose={() => setIsApplyOpen(false)}
+        />
+
+        {/* Student Report Employer Modal */}
+        <ReportEmployerModal
+          isOpen={isReportOpen}
+          onClose={() => setIsReportOpen(false)}
+          employerId={job.companyId}
+          employerName={job.companyName}
+          jobId={job.id}
+          jobTitle={job.title}
         />
 
       </main>

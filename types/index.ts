@@ -23,10 +23,28 @@ export interface User {
   location?: string;
   rating?: number;
   status?: 'active' | 'suspended';
+  reportCount?: number;
+  reports?: EmployerReport[];
+  businessRegistrationNumber?: string;
+  taxId?: string;
   createdAt: string;
 }
 
-export type JobStatus = 'AVAILABLE' | 'FILLED' | 'FLAGGED';
+export interface EmployerReport {
+  id: string;
+  employerId: string;
+  employerName: string;
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  reason: string;
+  details?: string;
+  jobId?: string;
+  jobTitle?: string;
+  createdAt: string;
+}
+
+export type JobStatus = 'AVAILABLE' | 'FILLED' | 'FLAGGED' | 'SUSPENDED';
 export type WorkType = 'Part-Time' | 'Weekend' | 'Evening' | 'Remote' | 'Flexible' | 'On-Campus';
 
 export interface Job {

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { User, UserRole } from '@/types';
+import { User, UserRole, EmployerReport } from '@/types';
 import { MOCK_USERS } from '@/lib/mockData';
+import { useJobStore } from '@/store/useJobStore';
 
 export interface AuthLoginResponse {
   success: boolean;
@@ -26,6 +27,17 @@ interface AuthState {
   logout: () => void;
   register: (user: Partial<User>) => void;
   updateProfile: (updatedData: Partial<User>) => void;
+  verifyEmployer: (employerId: string, allow: boolean) => void;
+  reportEmployer: (
+    employerId: string,
+    studentId: string,
+    studentName: string,
+    studentEmail: string,
+    reason: string,
+    details?: string,
+    jobId?: string,
+    jobTitle?: string
+  ) => { success: boolean; banned: boolean; reportCount: number; message: string };
   toggleVerifyEmployer: (employerId: string) => void;
   toggleVerifyUser: (userId: string) => void;
   toggleUserStatus: (userId: string) => void;
@@ -118,6 +130,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return {
         success: false,
         message: `Account "${matchedUser.name}" is registered as a ${matchedUser.role.toUpperCase()} account. Please select the ${matchedUser.role.toUpperCase()} tab.`
+      };
+    }
+
+    // 5. Automatic Removal Barrier: Block employers with 3+ reports or suspended
+    if (matchedUser.role === 'employer' && (matchedUser.status === 'suspended' || (matchedUser.reportCount && matchedUser.reportCount >= 3))) {
+      return {
+        success: false,
+        message: 'Account Suspended: This employer account was automatically removed from CampusFlex due to reaching 3 student safety reports.',
       };
     }
 
@@ -245,6 +265,118 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         usersList: updatedList,
       };
     });
+  },
+
+  verifyEmployer: (employerId: string, allow: boolean) => {
+    set((state) => {
+      const updatedList = state.usersList.map((u) => {
+        if (u.id === employerId) {
+          return {
+            ...u,
+            verified: allow,
+            status: allow ? ('active' as const) : ('suspended' as const),
+          };
+        }
+        return u;
+      });
+      const currentUser = state.currentUser?.id === employerId
+        ? {
+            ...state.currentUser,
+            verified: allow,
+            status: allow ? ('active' as const) : ('suspended' as const),
+          }
+        : state.currentUser;
+
+      return { usersList: updatedList, currentUser };
+    });
+  },
+
+  reportEmployer: (
+    employerId: string,
+    studentId: string,
+    studentName: string,
+    studentEmail: string,
+    reason: string,
+    details?: string,
+    jobId?: string,
+    jobTitle?: string
+  ) => {
+    let isBanned = false;
+    let finalCount = 0;
+    let reportMessage = '';
+
+    set((state) => {
+      const targetEmployer = state.usersList.find((u) => u.id === employerId);
+      if (!targetEmployer) return state;
+
+      const existingReports = targetEmployer.reports || [];
+      const alreadyReported = existingReports.some((r) => r.studentId === studentId);
+      if (alreadyReported) {
+        reportMessage = 'You have already submitted a report for this employer.';
+        finalCount = targetEmployer.reportCount || existingReports.length;
+        return state;
+      }
+
+      const newReport: EmployerReport = {
+        id: `rep-${Date.now()}`,
+        employerId,
+        employerName: targetEmployer.companyName || targetEmployer.name,
+        studentId,
+        studentName,
+        studentEmail,
+        reason,
+        details,
+        jobId,
+        jobTitle,
+        createdAt: new Date().toISOString(),
+      };
+
+      const updatedReports = [...existingReports, newReport];
+      finalCount = updatedReports.length;
+      isBanned = finalCount >= 3;
+
+      const updatedList = state.usersList.map((u) => {
+        if (u.id === employerId) {
+          return {
+            ...u,
+            reportCount: finalCount,
+            reports: updatedReports,
+            status: isBanned ? ('suspended' as const) : u.status,
+            verified: isBanned ? false : u.verified,
+          };
+        }
+        return u;
+      });
+
+      const currentUser = state.currentUser?.id === employerId
+        ? {
+            ...state.currentUser,
+            reportCount: finalCount,
+            reports: updatedReports,
+            status: isBanned ? ('suspended' as const) : state.currentUser.status,
+            verified: isBanned ? false : state.currentUser.verified,
+          }
+        : state.currentUser;
+
+      // If employer reaches 3 reports, automatically suspend all their jobs!
+      if (isBanned) {
+        try {
+          useJobStore.getState().suspendJobsByEmployer(employerId);
+        } catch (e) {}
+        reportMessage = `AUTOMATIC REMOVAL ENFORCED: Employer reached 3 student reports and has been automatically removed from CampusFlex.`;
+      } else {
+        reportMessage = `Report submitted successfully (${finalCount}/3). CampusFlex prioritizes student workplace safety.`;
+      }
+
+      return { usersList: updatedList, currentUser };
+    });
+
+    return {
+      success: true,
+      banned: isBanned,
+      reportCount: finalCount,
+      message: reportMessage || 'Report recorded.',
+    };
   },
 
   toggleVerifyEmployer: (employerId: string) => {
