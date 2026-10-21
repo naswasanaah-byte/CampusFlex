@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { User, UserRole, EmployerReport } from '@/types';
 import { MOCK_USERS } from '@/lib/mockData';
 import { useJobStore } from '@/store/useJobStore';
+import { useNotificationStore } from '@/store/useNotificationStore';
 
 export interface AuthLoginResponse {
   success: boolean;
@@ -202,25 +203,54 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ currentUser: existing, isAuthenticated: true });
         return { success: true };
       }
+      const isEmployer = role === 'employer';
       const googleUser: User = {
-        id: `user-google-${Date.now()}`,
-        name: name || 'Google User',
+        id: isEmployer ? `user-employer-${Date.now()}` : `user-google-${Date.now()}`,
+        name: name || (isEmployer ? 'Employer Partner' : 'Google User'),
         email: cleanEmail,
         authProvider: 'google',
         role: role || 'student',
         avatar: avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
-        verified: true,
+        verified: !isEmployer, // Gatekeeper: employers must be approved by Super Admin
         department: 'Computer Science',
         year: 'Semester 1',
         skills: ['Problem Solving', 'Communication'],
-        status: 'active',
+        companyName: isEmployer ? (name || 'Registered Employer') : undefined,
+        status: isEmployer ? 'pending' : 'active',
+        reportCount: 0,
+        reports: [],
         createdAt: new Date().toISOString(),
       };
+
       set((state) => ({
         usersList: [...state.usersList, googleUser],
         currentUser: googleUser,
         isAuthenticated: true,
       }));
+
+      // When an employer signs up with Google, notify Super Admin immediately
+      if (isEmployer) {
+        useNotificationStore.getState().addNotification({
+          userId: 'user-admin-1',
+          title: `🏢 New Employer Registered: ${googleUser.companyName || googleUser.name}`,
+          message: `${googleUser.name} registered via Google (${googleUser.email}). Super Admin verification is required before allowing them into the app to recruit students.`,
+          type: 'system',
+          link: `/admin/users?tab=pending&review=${googleUser.id}`,
+        });
+
+        fetch('/api/admin/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'register_employer',
+            userId: googleUser.id,
+            name: googleUser.name,
+            email: googleUser.email,
+            companyName: googleUser.companyName,
+          }),
+        }).catch(() => {});
+      }
+
       return { success: true };
     }
   },
@@ -230,21 +260,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   register: (userData: Partial<User>) => {
+    const isEmployer = userData.role === 'employer';
     const newUser: User = {
-      id: `user-${Date.now()}`,
-      name: userData.name || 'New User',
+      id: isEmployer ? `user-employer-${Date.now()}` : `user-${Date.now()}`,
+      name: userData.name || (isEmployer ? 'Employer Partner' : 'New User'),
       email: (userData.email || 'user@campus.edu').toLowerCase().trim(),
       password: userData.password || 'password123',
       authProvider: 'credentials',
       role: userData.role || 'student',
-      avatar: userData.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80',
-      verified: userData.role === 'student',
+      avatar: userData.avatar || (isEmployer
+        ? 'https://images.unsplash.com/photo-1549923746-c502d488b3ea?w=300&auto=format&fit=crop&q=80'
+        : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'),
+      verified: !isEmployer, // Gatekeeper: employers require Super Admin verification
       department: userData.department || 'Computer Science',
       year: userData.year || 'Semester 1',
       skills: userData.skills || ['Communication', 'Teamwork'],
-      companyName: userData.companyName,
-      companyLogo: userData.companyLogo || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80',
-      status: 'active',
+      companyName: userData.companyName || (isEmployer ? userData.name : undefined),
+      companyLogo: userData.companyLogo || (isEmployer ? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80' : undefined),
+      companyDescription: userData.companyDescription || (isEmployer ? 'Campus recruitment partner seeking university student talent.' : undefined),
+      businessRegistrationNumber: userData.businessRegistrationNumber || (isEmployer ? `REG-2026-${Math.floor(1000 + Math.random() * 9000)}` : undefined),
+      taxId: userData.taxId,
+      location: userData.location || 'Campus / Local Partner',
+      phone: userData.phone || '+91 98765 00000',
+      status: isEmployer ? 'pending' : 'active',
+      reportCount: 0,
+      reports: [],
       createdAt: new Date().toISOString(),
     };
 
@@ -253,6 +293,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       currentUser: newUser,
       isAuthenticated: true,
     }));
+
+    // If an employer registered, dispatch alert message to Super Admin
+    if (isEmployer) {
+      useNotificationStore.getState().addNotification({
+        userId: 'user-admin-1',
+        title: `🏢 New Employer Registered: ${newUser.companyName || newUser.name}`,
+        message: `${newUser.name} (${newUser.companyName || 'New Company'}) has registered with email ${newUser.email}. Verification required before allowing them to enter the app and recruit students.`,
+        type: 'system',
+        link: `/admin/users?tab=pending&review=${newUser.id}`,
+      });
+
+      // Synchronize with Java Backend JDBC
+      fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'register_employer',
+          userId: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+          companyName: newUser.companyName,
+          regNumber: newUser.businessRegistrationNumber,
+        }),
+      }).catch(() => {});
+    }
   },
 
   updateProfile: (updatedData: Partial<User>) => {
@@ -289,6 +354,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       return { usersList: updatedList, currentUser };
     });
+
+    // Notify Employer of the Verification Decision
+    const target = get().usersList.find((u) => u.id === employerId);
+    useNotificationStore.getState().addNotification({
+      userId: employerId,
+      title: allow ? '🎉 Employer Account Verified!' : '⚠️ Employer Account Notice',
+      message: allow
+        ? `Super Admin Avani SL has verified ${target?.companyName || 'your company'}. You are now allowed to enter the app, post job positions, and hire university students.`
+        : 'Your employer portal access has been revoked by the Super Admin.',
+      type: 'system',
+    });
+
+    // Synchronize verification with Java Backend JDBC
+    fetch('/api/admin/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: allow ? 'verify' : 'unverify',
+        userId: employerId,
+      }),
+    }).catch(() => {});
   },
 
   reportEmployer: (

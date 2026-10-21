@@ -22,12 +22,18 @@ import {
   Search,
   ExternalLink,
   Settings,
-  Sparkles
+  Sparkles,
+  Eye,
+  Mail,
+  Building2,
+  Calendar
 } from 'lucide-react';
 import Link from 'next/link';
+import { EmployerVerificationModal } from '@/components/admin/EmployerVerificationModal';
+import { User } from '@/types';
 
 export default function AdminDashboard() {
-  const { currentUser, usersList, toggleVerifyUser, toggleUserStatus } = useAuthStore();
+  const { currentUser, usersList, verifyEmployer, toggleVerifyUser, toggleUserStatus } = useAuthStore();
   const { jobs, updateJob, deleteJob } = useJobStore();
   const { applications } = useApplicationStore();
 
@@ -36,6 +42,7 @@ export default function AdminDashboard() {
   const [auditLogs, setAuditLogs] = useState<AIAdminAuditLog[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [successToast, setSuccessToast] = useState('');
+  const [reviewingEmployer, setReviewingEmployer] = useState<User | null>(null);
 
   // Fetch Java Backend Stats & Health
   const checkBackendHealth = async () => {
@@ -151,36 +158,138 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* KPI Stats Grid */}
+        {/* KPI Stats Grid - Fresh Platform Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="Total Students"
-            value={students.length || 148}
-            subtitle="Verified university talent"
+            value={students.length}
+            subtitle="Registered university talent"
             icon={Users}
-            trend="+12 this week"
+            trend="Active on campus"
           />
           <StatCard
             title="Registered Employers"
-            value={employers.length || 32}
-            subtitle={`${pendingEmployers.length} pending review`}
+            value={employers.length}
+            subtitle={`${pendingEmployers.length} pending verification`}
             icon={Briefcase}
             colorGradient="from-indigo-600 to-purple-600"
           />
           <StatCard
             title="Active Job Postings"
-            value={activeJobs.length || 18}
+            value={activeJobs.length}
             subtitle={`${flaggedJobs.length} flagged for review`}
             icon={Activity}
             colorGradient="from-purple-600 to-pink-600"
           />
           <StatCard
             title="Shift Payouts Handled"
-            value="₹4,52,000"
-            subtitle="Guaranteed shift completion"
+            value={javaStats?.totalShiftEarningsPaid !== undefined ? `₹${javaStats.totalShiftEarningsPaid.toLocaleString('en-IN')}` : '₹0'}
+            subtitle="Platform escrow ready • 0 shifts"
             icon={DollarSign}
             colorGradient="from-emerald-600 to-teal-600"
           />
+        </div>
+
+        {/* Incoming Employer Registration Messages & Verification Section */}
+        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className={`w-2.5 h-2.5 rounded-full ${pendingEmployers.length > 0 ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+                <h3 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-purple-600" />
+                  Incoming Employer Registration Messages & Verification
+                </h3>
+                {pendingEmployers.length > 0 ? (
+                  <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 text-[10px] font-black">
+                    {pendingEmployers.length} Awaiting Verification
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[10px] font-black">
+                    All Verified
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500">
+                When employers register in CampusFlex, their details appear here. The Super Admin must check their details and verify their account before they can enter the app to hire students.
+              </p>
+            </div>
+            <Link href="/admin/users?tab=PENDING" className="text-xs font-bold text-purple-600 hover:underline">
+              View Directory →
+            </Link>
+          </div>
+
+          {pendingEmployers.length === 0 ? (
+            <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-200 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span className="font-bold">Queue Clear:</span>
+                <span>All registered employers have been verified. No pending registration messages.</span>
+              </div>
+              <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold uppercase">
+                Active Gatekeeper
+              </span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              {pendingEmployers.map((emp) => (
+                <div
+                  key={emp.id}
+                  className="p-4 rounded-2xl bg-amber-50/40 dark:bg-amber-950/20 border border-amber-200/70 dark:border-amber-800/60 flex flex-col justify-between gap-3"
+                >
+                  <div className="space-y-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={emp.companyLogo || emp.avatar || 'https://images.unsplash.com/photo-1549923746-c502d488b3ea?w=100'}
+                          alt={emp.companyName || emp.name}
+                          className="w-10 h-10 rounded-xl object-cover ring-1 ring-amber-300 dark:ring-amber-700 shrink-0"
+                        />
+                        <div>
+                          <h4 className="text-xs font-black text-slate-900 dark:text-white">
+                            {emp.companyName || emp.name}
+                          </h4>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                            Recruiter: <strong className="text-slate-700 dark:text-slate-300">{emp.name}</strong> • {emp.email}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 text-[10px] font-extrabold shrink-0 animate-pulse">
+                        Pending Entry
+                      </span>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-white dark:bg-slate-800/80 border border-amber-100 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300 space-y-1">
+                      <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200 text-xs">
+                        <Building2 className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Registration Message to Admin</span>
+                      </div>
+                      <p className="text-slate-500 dark:text-slate-400 text-[11px] italic">
+                        &quot;New employer registered requesting platform access. Business Reg: <strong>{emp.businessRegistrationNumber || 'REG-PENDING'}</strong>. Please inspect credentials and verify to allow student hiring.&quot;
+                      </p>
+                      <div className="pt-1 flex items-center justify-between text-[10px] text-slate-400 border-t border-slate-100 dark:border-slate-700/60 font-mono">
+                        <span>Reg No: {emp.businessRegistrationNumber || 'REG-PENDING'}</span>
+                        <span>{new Date(emp.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-amber-200/40 dark:border-amber-800/40">
+                    <span className="text-[10px] text-slate-400">
+                      📍 {emp.location || 'Campus / Local Partner'}
+                    </span>
+                    <button
+                      onClick={() => setReviewingEmployer(emp)}
+                      className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-black shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      Check Details & Verify
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Quick Command Navigation Cards */}
@@ -364,6 +473,20 @@ export default function AdminDashboard() {
           </div>
 
         </div>
+
+        {/* Modal: Check Employer Details & Verify */}
+        <EmployerVerificationModal
+          employer={reviewingEmployer}
+          isOpen={!!reviewingEmployer}
+          onClose={() => setReviewingEmployer(null)}
+          onVerify={(employerId, allow) => {
+            verifyEmployer(employerId, allow);
+            showToast(allow
+              ? `Verified ${reviewingEmployer?.companyName || 'Employer'}! Allowed entry into the app to recruit students.`
+              : `Revoked entry for ${reviewingEmployer?.companyName || 'Employer'}.`
+            );
+          }}
+        />
 
       </main>
     </div>

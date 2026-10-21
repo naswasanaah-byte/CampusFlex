@@ -22,7 +22,7 @@ export interface User {
   companyDescription?: string;
   location?: string;
   rating?: number;
-  status?: 'active' | 'suspended';
+  status?: 'active' | 'suspended' | 'pending';
   reportCount?: number;
   reports?: EmployerReport[];
   businessRegistrationNumber?: string;

@@ -26,19 +26,19 @@ export const MOCK_USERS: User[] = [
     email: 'hiring@brightacademy.com',
     role: 'employer',
     avatar: 'https://images.unsplash.com/photo-1549923746-c502d488b3ea?w=300&auto=format&fit=crop&q=80',
-    verified: true,
+    verified: false,
     companyName: 'Bright Academy',
     companyLogo: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80',
     companyDescription: 'Premier education platform providing tutoring and academic support.',
     location: 'Calicut, Kerala',
     phone: '+91 98765 00001',
     rating: 4.9,
-    status: 'active',
+    status: 'pending',
     reportCount: 0,
     reports: [],
     businessRegistrationNumber: 'REG-2025-BRT-1002',
     taxId: 'GSTIN32AAACB0987D1Z8',
-    createdAt: '2025-11-10T14:00:00Z',
+    createdAt: '2026-10-21T08:00:00Z',
   },
   {
     id: 'user-employer-2',
@@ -56,10 +56,10 @@ export const MOCK_USERS: User[] = [
     location: 'Campus Technology Park',
     phone: '+91 98765 44321',
     rating: 4.5,
-    status: 'active',
+    status: 'pending',
     reportCount: 0,
     reports: [],
-    createdAt: '2026-02-01T10:30:00Z',
+    createdAt: '2026-10-21T09:30:00Z',
   },
   {
     id: 'user-admin-1',
@@ -316,41 +316,29 @@ export const MOCK_APPLICATIONS: Application[] = [
 
 export const MOCK_NOTIFICATIONS: Notification[] = [
   {
-    id: 'notif-001',
-    userId: 'user-student-1',
-    title: 'Application Accepted! 🎉',
-    message: 'InfoDesk accepted your application for Data Entry Operator.',
-    type: 'application',
+    id: 'notif-admin-emp-1',
+    userId: 'user-admin-1',
+    title: '🏢 New Employer Registration: Bright Academy',
+    message: 'Bright Academy (hiring@brightacademy.com, Reg: REG-2025-BRT-1002) has registered. Super Admin verification is required before allowing them to enter the app and recruit students.',
+    type: 'system',
     read: false,
-    createdAt: '2026-08-18T10:00:00Z',
-    link: '/student/applications',
+    createdAt: '2026-10-21T08:05:00Z',
+    link: '/admin/users?tab=pending&review=user-employer-1',
+  },
+  {
+    id: 'notif-admin-emp-2',
+    userId: 'user-admin-1',
+    title: '🏢 New Employer Registration: Apex Logistics & Tech',
+    message: 'Apex Logistics & Tech (contact@apexlogistics.com, Reg: REG-2026-APX-8821) registered. Review company details and verify to allow entry into CampusFlex.',
+    type: 'system',
+    read: false,
+    createdAt: '2026-10-21T09:35:00Z',
+    link: '/admin/users?tab=pending&review=user-employer-2',
   },
 ];
 
 export const MOCK_CHATS: ChatMessage[] = [];
 export const MOCK_CHAT_MESSAGES: ChatMessage[] = [];
 
-export const MOCK_EARNINGS: EarningsRecord[] = [
-  {
-    id: 'earn-001',
-    studentId: 'user-student-1',
-    jobTitle: 'Data Entry Shift',
-    companyName: 'InfoDesk',
-    hoursWorked: 5,
-    hourlyRate: 500,
-    totalAmount: 2500,
-    status: 'PAID',
-    date: '18 Aug 2026',
-  },
-  {
-    id: 'earn-002',
-    studentId: 'user-student-1',
-    jobTitle: 'Library Support Shift',
-    companyName: 'Greenfield College',
-    hoursWorked: 4,
-    hourlyRate: 437.5,
-    totalAmount: 1750,
-    status: 'PAID',
-    date: '15 Aug 2026',
-  },
-];
+export const MOCK_EARNINGS: EarningsRecord[] = [];
+

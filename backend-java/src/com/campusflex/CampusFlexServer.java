@@ -58,6 +58,7 @@ public class CampusFlexServer {
         server.createContext("/api/admin/settings", new AdminSettingsHandler());
         server.createContext("/api/admin/jdbc", new AdminJDBCHandler());
         server.createContext("/api/admin/reports", new AdminReportsHandler());
+        server.createContext("/api/admin/messages", new AdminMessagesHandler());
 
         server.setExecutor(null); // default executor
         System.out.println("🚀 [CampusFlex Java Backend] Server started on port " + serverPort + " (Java 17)");
@@ -233,21 +234,25 @@ public class CampusFlexServer {
                 "{" +
                 "\"success\":true," +
                 "\"stats\":{" +
-                "\"totalStudents\":148," +
-                "\"totalEmployers\":32," +
-                "\"activeJobs\":18," +
-                "\"filledJobs\":11," +
-                "\"totalApplications\":84," +
-                "\"pendingVerifications\":3," +
-                "\"flaggedScamJobs\":1," +
-                "\"totalShiftEarningsPaid\":452000," +
-                "\"platformCommission\":%f," +
+                "\"totalStudents\":%d," +
+                "\"totalEmployers\":%d," +
+                "\"activeJobs\":%d," +
+                "\"filledJobs\":0," +
+                "\"totalApplications\":0," +
+                "\"pendingVerifications\":%d," +
+                "\"flaggedScamJobs\":0," +
+                "\"totalShiftEarningsPaid\":0," +
+                "\"platformCommission\":%.1f," +
                 "\"systemStatus\":\"HEALTHY\"," +
                 "\"aiGovernanceConfidence\":99.4," +
                 "\"backendLanguage\":\"Java 17 (OpenJDK)\"," +
                 "\"jdbcStatus\":\"ONLINE (CampusFlex JDBC Driver v1.0)\"," +
                 "\"serverPort\":%d" +
                 "}}",
+                DatabaseManager.getStudentCount(),
+                DatabaseManager.getEmployerCount(),
+                DatabaseManager.getActiveJobCount(),
+                DatabaseManager.getPendingEmployerCount(),
                 commissionRate, PORT
             );
 
@@ -272,23 +277,50 @@ public class CampusFlexServer {
                     DatabaseManager.verifyEmployer(userId, true);
                 } else if ("unverify".equalsIgnoreCase(action)) {
                     DatabaseManager.verifyEmployer(userId, false);
+                } else if ("register_employer".equalsIgnoreCase(action)) {
+                    String name = extractJsonField(body, "name");
+                    String email = extractJsonField(body, "email");
+                    String companyName = extractJsonField(body, "companyName");
+                    String regNumber = extractJsonField(body, "regNumber");
+                    DatabaseManager.registerEmployer(userId, name, email, companyName, regNumber);
                 }
 
                 String msg = "Admin action '" + action + "' on user '" + userId + "' processed successfully via JDBC in Java Backend.";
                 sendResponse(exchange, 200, "{\"success\":true,\"message\":\"" + msg + "\"}");
             } else {
-                // Return users overview
+                // Return users overview - fresh start with pending employer verification
                 String response = "{" +
                     "\"success\":true," +
                     "\"count\":3," +
                     "\"users\":[" +
                     "{\"id\":\"user-admin-1\",\"name\":\"Avani SL\",\"email\":\"avanislavanisl536@gmail.com\",\"role\":\"admin\",\"status\":\"active\",\"verified\":true}," +
                     "{\"id\":\"user-student-1\",\"name\":\"Student User\",\"email\":\"student@university.edu\",\"role\":\"student\",\"status\":\"active\",\"verified\":true}," +
-                    "{\"id\":\"user-employer-1\",\"name\":\"Bright Academy\",\"email\":\"hiring@brightacademy.com\",\"role\":\"employer\",\"status\":\"active\",\"verified\":true}" +
+                    "{\"id\":\"user-employer-1\",\"name\":\"Bright Academy\",\"email\":\"hiring@brightacademy.com\",\"role\":\"employer\",\"status\":\"pending\",\"verified\":false}" +
                     "]" +
                     "}";
                 sendResponse(exchange, 200, response);
             }
+        }
+    }
+
+    static class AdminMessagesHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("OPTIONS".equalsIgnoreCase(exchange.getRequestMethod())) {
+                sendResponse(exchange, 204, "");
+                return;
+            }
+
+            List<Map<String, String>> messages = DatabaseManager.getAdminMessages();
+            StringBuilder sb = new StringBuilder("{\"success\":true,\"messages\":[");
+            for (int i = 0; i < messages.size(); i++) {
+                Map<String, String> m = messages.get(i);
+                if (i > 0) sb.append(",");
+                sb.append(String.format("{\"id\":\"%s\",\"employerId\":\"%s\",\"title\":\"%s\",\"message\":\"%s\",\"status\":\"%s\",\"createdAt\":\"%s\"}",
+                    m.get("id"), m.get("employerId"), m.get("title"), m.get("message"), m.get("status"), m.get("createdAt")));
+            }
+            sb.append("]}");
+            sendResponse(exchange, 200, sb.toString());
         }
     }
 

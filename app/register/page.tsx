@@ -21,6 +21,9 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [department, setDepartment] = useState('Computer Science');
   const [companyName, setCompanyName] = useState('');
+  const [businessReg, setBusinessReg] = useState('');
+  const [phone, setPhone] = useState('');
+  const [location, setLocation] = useState('');
   const [skills, setSkills] = useState('Teaching, Communication, Problem Solving');
   const [googleModalOpen, setGoogleModalOpen] = useState(false);
   const [customGoogleEmail, setCustomGoogleEmail] = useState('');
@@ -35,6 +38,9 @@ export default function RegisterPage() {
       role,
       department: role === 'student' ? department : undefined,
       companyName: role === 'employer' ? companyName : undefined,
+      businessRegistrationNumber: role === 'employer' ? (businessReg || `REG-2026-${Math.floor(1000 + Math.random() * 9000)}`) : undefined,
+      phone: role === 'employer' ? phone : undefined,
+      location: role === 'employer' ? location : undefined,
       skills: role === 'student' ? skills.split(',').map((s) => s.trim()) : undefined,
     });
 
@@ -186,19 +192,71 @@ export default function RegisterPage() {
               </div>
             </>
           ) : (
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Company / Department Name
-              </label>
-              <input
-                type="text"
-                required
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                placeholder="e.g. TechCorp Innovations or Dining Services"
-                className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
+            <>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Company / Organization Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  placeholder="e.g. Bright Academy or Apex Logistics"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Business Registration / Tax ID
+                  </label>
+                  <input
+                    type="text"
+                    value={businessReg}
+                    onChange={(e) => setBusinessReg(e.target.value)}
+                    placeholder="e.g. REG-2026-BRT-1002"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Official Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+91 98765 00000"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Office Location / Campus Headquarters
+                </label>
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="e.g. Campus Technology Park or Calicut, Kerala"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/40 text-[11px] text-purple-800 dark:text-purple-300 space-y-0.5">
+                <p className="font-bold flex items-center gap-1.5">
+                  <span>🛡️</span> Super Admin Verification Guard
+                </p>
+                <p className="text-slate-600 dark:text-slate-400">
+                  After registration, your account will be reviewed by the Super Admin. You will be allowed into the app to recruit students once verified.
+                </p>
+              </div>
+            </>
           )}
 
           {/* Password Input */}

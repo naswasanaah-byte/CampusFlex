@@ -27,9 +27,11 @@ import {
   FileText,
   Check,
   X,
-  RotateCcw
+  RotateCcw,
+  Eye
 } from 'lucide-react';
 import Link from 'next/link';
+import { EmployerVerificationModal } from '@/components/admin/EmployerVerificationModal';
 
 export default function AdminUsersPage() {
   const { usersList, verifyEmployer, toggleVerifyUser, toggleUserStatus, deleteUser } = useAuthStore();
@@ -41,6 +43,9 @@ export default function AdminUsersPage() {
 
   // Selected Employer for Viewing Student Reports
   const [selectedEmployerForReports, setSelectedEmployerForReports] = useState<User | null>(null);
+
+  // Selected Employer for Full Credential Inspection & Verification
+  const [inspectingEmployer, setInspectingEmployer] = useState<User | null>(null);
 
   // Live JDBC Database Status from Java Backend
   const [jdbcData, setJdbcData] = useState<any>(null);
@@ -60,7 +65,23 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     fetchJdbcStatus();
-  }, []);
+
+    // Check if deep linked from an admin notification or dashboard card (?review=... or ?tab=pending)
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      const reviewId = params.get('review');
+      if (tabParam === 'pending' || tabParam === 'PENDING') {
+        setActiveTab('PENDING');
+      }
+      if (reviewId) {
+        const found = usersList.find((u) => u.id === reviewId);
+        if (found) {
+          setInspectingEmployer(found);
+        }
+      }
+    }
+  }, [usersList]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -470,6 +491,15 @@ export default function AdminUsersPage() {
                               {/* Employer Gatekeeper Actions */}
                               {user.role === 'employer' && (
                                 <>
+                                  <button
+                                    onClick={() => setInspectingEmployer(user)}
+                                    className="px-2.5 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 text-[11px] font-black border border-purple-200 dark:border-purple-800 flex items-center gap-1 cursor-pointer transition-all"
+                                    title="Check business registration, tax ID, and contact details"
+                                  >
+                                    <Eye className="w-3.5 h-3.5" />
+                                    Check Details
+                                  </button>
+
                                   {!user.verified ? (
                                     <button
                                       onClick={() => {
@@ -604,6 +634,20 @@ export default function AdminUsersPage() {
             </div>
           </Modal>
         )}
+
+        {/* MODAL: CHECK EMPLOYER DETAILS & VERIFY */}
+        <EmployerVerificationModal
+          employer={inspectingEmployer}
+          isOpen={!!inspectingEmployer}
+          onClose={() => setInspectingEmployer(null)}
+          onVerify={(employerId, allow) => {
+            verifyEmployer(employerId, allow);
+            showToast(allow
+              ? `Verified ${inspectingEmployer?.companyName || 'Employer'}! Allowed entry into the app.`
+              : `Revoked entry for ${inspectingEmployer?.companyName || 'Employer'}.`
+            );
+          }}
+        />
 
       </main>
     </div>

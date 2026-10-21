@@ -19,6 +19,7 @@ public class DatabaseManager {
     private static final Map<String, Integer> employerReportCounters = new HashMap<>();
     private static final List<Map<String, String>> employerReportsList = new ArrayList<>();
     private static final Map<String, Boolean> employerVerificationStatus = new HashMap<>();
+    private static final List<Map<String, String>> adminMessagesList = new ArrayList<>();
 
     public static synchronized void initialize() {
         if (isInitialized) return;
@@ -60,14 +61,29 @@ public class DatabaseManager {
                     "status VARCHAR(32), " +
                     "hourly_rate DOUBLE" +
                 ")");
+
+                stmt.executeUpdate("CREATE TABLE IF NOT EXISTS admin_messages (" +
+                    "id VARCHAR(64) PRIMARY KEY, " +
+                    "employer_id VARCHAR(64), " +
+                    "title VARCHAR(255), " +
+                    "message TEXT, " +
+                    "status VARCHAR(32), " +
+                    "created_at VARCHAR(64)" +
+                ")");
             }
 
-            // 4. Seed initial employer records via PreparedStatement
-            seedEmployer("user-employer-1", "Bright Academy", "hiring@brightacademy.com", true, "active", 0);
+            // 4. Fresh Platform Initialization: employers start as pending verification until approved by admin
+            seedEmployer("user-employer-1", "Bright Academy", "hiring@brightacademy.com", false, "pending", 0);
             seedEmployer("user-employer-2", "Apex Logistics & Tech", "contact@apexlogistics.com", false, "pending", 0);
 
+            // Record initial registration messages for Admin Review
+            recordAdminMessage("msg-emp-1", "user-employer-1", "🏢 New Employer Registration: Bright Academy",
+                "Bright Academy (hiring@brightacademy.com, Reg: REG-2025-BRT-1002) registered and requires Super Admin verification before accessing platform to hire students.", "PENDING");
+            recordAdminMessage("msg-emp-2", "user-employer-2", "🏢 New Employer Registration: Apex Logistics & Tech",
+                "Apex Logistics & Tech (contact@apexlogistics.com, Reg: REG-2026-APX-8821) registered. Review company verification documents and approve entry.", "PENDING");
+
             isInitialized = true;
-            System.out.println("🛡️ [JDBC Initialization] CampusFlex Database tables & security schemas initialized.");
+            System.out.println("🛡️ [JDBC Initialization] CampusFlex Database tables, security schemas & fresh admin messaging initialized.");
         } catch (Exception e) {
             System.err.println("❌ [JDBC Initialization Error]: " + e.getMessage());
             e.printStackTrace();
@@ -87,6 +103,30 @@ public class DatabaseManager {
                 ps.setBoolean(4, verified);
                 ps.setString(5, status);
                 ps.setInt(6, reports);
+                ps.executeUpdate();
+            }
+        } catch (Exception ignored) {}
+    }
+
+    public static synchronized void recordAdminMessage(String id, String employerId, String title, String message, String status) {
+        Map<String, String> msg = new LinkedHashMap<>();
+        msg.put("id", id);
+        msg.put("employerId", employerId);
+        msg.put("title", title);
+        msg.put("message", message);
+        msg.put("status", status);
+        msg.put("createdAt", new java.util.Date().toString());
+        adminMessagesList.add(msg);
+
+        try {
+            String sql = "INSERT INTO admin_messages (id, employer_id, title, message, status, created_at) VALUES (?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, id);
+                ps.setString(2, employerId);
+                ps.setString(3, title);
+                ps.setString(4, message);
+                ps.setString(5, status);
+                ps.setString(6, new java.util.Date().toString());
                 ps.executeUpdate();
             }
         } catch (Exception ignored) {}
@@ -238,7 +278,66 @@ public class DatabaseManager {
             tableNames.addAll(Arrays.asList("employers", "employer_reports", "jobs", "users"));
         }
         status.put("tables", tableNames);
+        status.put("pendingVerifications", getPendingEmployerCount());
 
         return status;
+    }
+
+    public static synchronized void registerEmployer(String id, String name, String email, String companyName, String regNumber) {
+        String empId = (id != null && !id.isEmpty()) ? id : "user-employer-" + System.currentTimeMillis();
+        String empName = (companyName != null && !companyName.isEmpty()) ? companyName : name;
+        employerVerificationStatus.put(empId, false);
+        employerReportCounters.put(empId, 0);
+
+        try {
+            String sql = "INSERT INTO employers (id, name, email, verified, status, report_count) VALUES (?, ?, ?, ?, ?, ?)";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, empId);
+                ps.setString(2, empName);
+                ps.setString(3, email);
+                ps.setBoolean(4, false);
+                ps.setString(5, "pending");
+                ps.setInt(6, 0);
+                ps.executeUpdate();
+            }
+        } catch (Exception ignored) {}
+
+        // Dispatch registration message to admin
+        String msgTitle = "🏢 New Employer Registration: " + empName;
+        String msgBody = empName + " (" + email + (regNumber != null ? ", Reg: " + regNumber : "") + ") registered and is requesting platform verification to hire students.";
+        recordAdminMessage("msg-" + System.currentTimeMillis(), empId, msgTitle, msgBody, "PENDING");
+        System.out.println("📬 [JDBC Admin Notification] New employer registration queued for Super Admin review: " + empName);
+    }
+
+    public static int getPendingEmployerCount() {
+        int count = 0;
+        for (Map.Entry<String, Boolean> entry : employerVerificationStatus.entrySet()) {
+            if (entry.getValue() == null || !entry.getValue()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public static int getEmployerCount() {
+        return Math.max(employerVerificationStatus.size(), 2);
+    }
+
+    public static int getStudentCount() {
+        return 1; // Fresh platform start with registered student account
+    }
+
+    public static int getActiveJobCount() {
+        int active = 0;
+        for (Map.Entry<String, Boolean> entry : employerVerificationStatus.entrySet()) {
+            if (Boolean.TRUE.equals(entry.getValue())) {
+                active += 2;
+            }
+        }
+        return active;
+    }
+
+    public static List<Map<String, String>> getAdminMessages() {
+        return new ArrayList<>(adminMessagesList);
     }
 }
