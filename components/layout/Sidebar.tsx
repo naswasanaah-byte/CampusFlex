@@ -10,7 +10,6 @@ import {
   User,
   Clock,
   Bookmark,
-  DollarSign,
   Settings,
   PlusCircle,
   Users,
@@ -40,7 +39,6 @@ export const Sidebar: React.FC = () => {
     { label: 'My Timetable', href: '/student/saved', icon: Calendar },
     { label: 'Find Jobs', href: '/jobs', icon: Briefcase },
     { label: 'Applied Jobs', href: '/student/applications', icon: Clock },
-    { label: 'Earnings', href: '/student/earnings', icon: DollarSign },
     { label: 'Ratings', href: '/student/profile', icon: Star },
     { label: 'Settings', href: '/student/settings', icon: Settings },
   ];

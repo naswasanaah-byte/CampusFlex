@@ -7,7 +7,6 @@ import { useApplicationStore } from '@/store/useApplicationStore';
 import { useJobStore } from '@/store/useJobStore';
 import { Job } from '@/types';
 import { ApplyModal } from '@/components/jobs/ApplyModal';
-import { MOCK_EARNINGS } from '@/lib/mockData';
 import { calculateAIMatch } from '@/lib/aiEngine';
 import { formatHumanName } from '@/lib/googleAuth';
 import { Sparkles, Calendar, Clock, ArrowRight, MapPin } from 'lucide-react';
@@ -23,10 +22,7 @@ export default function StudentDashboard() {
 
   // Dynamic Applications count per logged in student
   const studentApps = applications.filter((a) => a.studentId === currentUser?.id);
-
-  // Dynamic Earnings calculation per logged in student
-  const studentEarnings = MOCK_EARNINGS.filter((e) => e.studentId === currentUser?.id);
-  const totalEarned = studentEarnings.reduce((acc, curr) => acc + curr.totalAmount, 0);
+  const acceptedApps = studentApps.filter((a) => a.status === 'ACCEPTED');
 
   // Available Jobs
   const recommendedJobs = jobs.filter((j) => j.status === 'AVAILABLE');
@@ -76,8 +72,8 @@ export default function StudentDashboard() {
               <p className="text-[11px] text-slate-300 leading-snug">Explore verified local & campus jobs matching your schedule.</p>
             </div>
             <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 space-y-1">
-              <div className="text-xs font-black text-indigo-300">3. Apply & Earn</div>
-              <p className="text-[11px] text-slate-300 leading-snug">Submit applications in 1-click & track verified shift payouts.</p>
+              <div className="text-xs font-black text-indigo-300">3. Apply & Track</div>
+              <p className="text-[11px] text-slate-300 leading-snug">Submit applications in 1-click & track your application status.</p>
             </div>
           </div>
         </div>
@@ -97,9 +93,9 @@ export default function StudentDashboard() {
           </div>
 
           <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-glass space-y-1">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Earnings</span>
-            <div className="text-3xl font-black text-[#5B46E5]">₹{totalEarned.toLocaleString('en-IN')}</div>
-            <p className="text-[11px] text-slate-400">Total earned</p>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Accepted Offers</span>
+            <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{acceptedApps.length}</div>
+            <p className="text-[11px] text-slate-400">Confirmed positions</p>
           </div>
         </div>
 
